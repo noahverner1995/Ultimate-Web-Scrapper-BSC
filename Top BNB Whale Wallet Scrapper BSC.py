@@ -54,12 +54,14 @@ for url in pages:
     
     #combine all the data rows in one single dataframe
     a = a.append(pd.DataFrame(df))  
-    #print the dataframe with an specific condition set upon the data of the Txn Count
+    
     def tester(mejora):
         mejora = mejora[(mejora['Txn Count']>200.0) & (mejora['Txn Count']<1000.0)] 
-        return mejora.to_csv('new_test_Txn_Count.csv') 
+        return mejora.to_csv('new_100pages_test_Txn_Count.csv') 
     
     tester(a)
-
+    
+#print the variable type of each header and  
+#print rows from the last page that matches an specific condition set upon the data of their Txn Count
 print(df.dtypes)
 print(df[(df['Txn Count']>200.0) & (df['Txn Count']<1000.0)])
