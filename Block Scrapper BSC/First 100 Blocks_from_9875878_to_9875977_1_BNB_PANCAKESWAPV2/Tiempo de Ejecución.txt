@@ -1,1 +1,2 @@
 Tiempo de Ejecución: 0:43:28.046132
+driver.implicitly_wait(10)
