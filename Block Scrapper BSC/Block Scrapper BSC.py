@@ -26,8 +26,9 @@ driver.implicitly_wait(10)
 #values for the example
 #Declaring a variable for looping over all the blocks
 blocks = np.arange(9875875, 9875878, 1)
-minimun_value_txn = 1
+minimun_value_txn = 0.02
 to_chain = 'PancakeSwap: Router v2'
+BNB = 'BNB'
 #set a final dataframe which will contain all the desired data from the arange that matches with the parameters set
 df_final = pd.DataFrame()
 
@@ -64,34 +65,52 @@ for block in blocks:
             for txn in range(1,50+1):
                 txn_hash = str(driver.find_element_by_xpath('//*[@id="paywall_mask"]/table/tbody/tr[{}]/td[2]'.format(txn)).text)
                 block_num = str(driver.find_element_by_xpath('//*[@id="paywall_mask"]/table/tbody/tr[{}]/td[3]'.format(txn)).text)
-                value_txn = float((driver.find_element_by_xpath('//*[@id="paywall_mask"]/table/tbody/tr[{}]/td[9]'.format(txn)).text).replace(' BNB',''))
                 to_destiny = driver.find_element_by_xpath('//*[@id="paywall_mask"]/table/tbody/tr[{}]/td[8]'.format(txn)).text
-                if value_txn >= minimun_value_txn and to_chain in to_destiny:
-                    row_data = [txn_hash, block_num, value_txn]
-                    df_data = pd.DataFrame([row_data], columns = ['Transaction Id', 'Block No', 'BNB Value'])
-                    print(df)
-                    df = df.append(df_data, ignore_index = True)
-                    
-                                                 
-                    
+                value_txn = str(driver.find_element_by_xpath('//*[@id="paywall_mask"]/table/tbody/tr[{}]/td[9]'.format(txn)).text)
+                if BNB in value_txn:
+                    value_txn = float(value_txn.replace(' BNB',''))
+                    if value_txn >= minimun_value_txn and to_chain in to_destiny:
+                        row_data = [txn_hash, block_num, value_txn]
+                        df_data = pd.DataFrame([row_data], columns = ['Transaction Id', 'Block No', 'BNB Value'])
+                        print(df)
+                        df = df.append(df_data, ignore_index = True)
+                else:
+                    value_txn = 0            
+                    if value_txn >= minimun_value_txn and to_chain in to_destiny:
+                        row_data = [txn_hash, block_num, value_txn]
+                        df_data = pd.DataFrame([row_data], columns = ['Transaction Id', 'Block No', 'BNB Value'])
+                        print(df)
+                        df = df.append(df_data, ignore_index = True)
+                                                                                         
         else:
             for txn in range(1,txn_found_last+1):
                 txn_hash = str(driver.find_element_by_xpath('//*[@id="paywall_mask"]/table/tbody/tr[{}]/td[2]'.format(txn)).text)
                 block_num = str(driver.find_element_by_xpath('//*[@id="paywall_mask"]/table/tbody/tr[{}]/td[3]'.format(txn)).text)
-                value_txn = float((driver.find_element_by_xpath('//*[@id="paywall_mask"]/table/tbody/tr[{}]/td[9]'.format(txn)).text).replace(' BNB',''))
                 to_destiny = driver.find_element_by_xpath('//*[@id="paywall_mask"]/table/tbody/tr[{}]/td[8]'.format(txn)).text
-                if value_txn >= minimun_value_txn and to_chain in to_destiny:
-                    row_data2 = [txn_hash, block_num, value_txn]
-                    df_data2 = pd.DataFrame([row_data2], columns = ['Transaction Id', 'Block No', 'BNB Value'])
-                    df2  = df2.append(df_data2, ignore_index = True)
-                    print(df2)
-                    df = df.append(df2, ignore_index = True)
+                value_txn = str(driver.find_element_by_xpath('//*[@id="paywall_mask"]/table/tbody/tr[{}]/td[9]'.format(txn)).text)
+                if BNB in value_txn:
+                    value_txn = float(value_txn.replace(' BNB',''))
+                    if value_txn >= minimun_value_txn and to_chain in to_destiny:
+                        row_data2 = [txn_hash, block_num, value_txn]
+                        df_data2 = pd.DataFrame([row_data2], columns = ['Transaction Id', 'Block No', 'BNB Value'])
+                        df2  = df2.append(df_data2, ignore_index = True)
+                        print(df2)
+                        df = df.append(df2, ignore_index = True)
+                else:
+                    value_txn = 0                      
+                    if value_txn >= minimun_value_txn and to_chain in to_destiny:
+                        row_data2 = [txn_hash, block_num, value_txn]
+                        df_data2 = pd.DataFrame([row_data2], columns = ['Transaction Id', 'Block No', 'BNB Value'])
+                        df2  = df2.append(df_data2, ignore_index = True)
+                        print(df2)
+                        df = df.append(df2, ignore_index = True)
+                        
     #delete every single duplicated row in the df for then adding it to the the final dataframe                
     df.drop_duplicates(subset='Transaction Id', keep='first', inplace= True)
     df_final = df_final.append(df, ignore_index = True)
 
 #export results to one single csv file
-df_final.to_csv('test_block_9875875_to_9875877_1_BNB_PANCAKESWAPV2_without_duplicates.csv')
+df_final.to_csv('ULTIMATE_test_block_9875879_to_9875880_point02_BNB_PANCAKESWAPV2_without_duplicates.csv')
 print(df_final)
 driver.quit()
 
