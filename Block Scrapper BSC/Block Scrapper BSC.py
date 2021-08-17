@@ -68,7 +68,7 @@ for block in blocks:
                 to_destiny = driver.find_element_by_xpath('//*[@id="paywall_mask"]/table/tbody/tr[{}]/td[8]'.format(txn)).text
                 value_txn = str(driver.find_element_by_xpath('//*[@id="paywall_mask"]/table/tbody/tr[{}]/td[9]'.format(txn)).text)
                 if BNB in value_txn:
-                    value_txn = float(value_txn.replace(' BNB',''))
+                    value_txn = float(value_txn.replace(' BNB','').replace(',',''))
                     if value_txn >= minimun_value_txn and to_chain in to_destiny:
                         row_data = [txn_hash, block_num, value_txn]
                         df_data = pd.DataFrame([row_data], columns = ['Transaction Id', 'Block No', 'BNB Value'])
@@ -89,7 +89,7 @@ for block in blocks:
                 to_destiny = driver.find_element_by_xpath('//*[@id="paywall_mask"]/table/tbody/tr[{}]/td[8]'.format(txn)).text
                 value_txn = str(driver.find_element_by_xpath('//*[@id="paywall_mask"]/table/tbody/tr[{}]/td[9]'.format(txn)).text)
                 if BNB in value_txn:
-                    value_txn = float(value_txn.replace(' BNB',''))
+                    value_txn = float(value_txn.replace(' BNB','').replace(',',''))
                     if value_txn >= minimun_value_txn and to_chain in to_destiny:
                         row_data2 = [txn_hash, block_num, value_txn]
                         df_data2 = pd.DataFrame([row_data2], columns = ['Transaction Id', 'Block No', 'BNB Value'])
