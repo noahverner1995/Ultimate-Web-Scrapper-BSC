@@ -58,7 +58,7 @@ for block in blocks:
     
         url = 'https://bscscan.com/txs?block={}&p={}'.format(block,page)
         driver.get(url)
-        txn_found = int(driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_topPageDiv"]/p/span').text.replace('A total of ','').replace(' transactions found',''))
+        txn_found = int(driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_topPageDiv"]/p/span').text.replace('A total of ','').replace(' transactions found','').replace(',',''))
         txn_found_last=txn_found%50
     
         if page < pages:
