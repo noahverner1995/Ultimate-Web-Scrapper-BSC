@@ -75,15 +75,15 @@ for block in blocks:
                     if value_txn >= minimun_value_txn and to_chain in to_destiny:
                         row_data = [txn_hash, block_num, value_txn]
                         df_data = pd.DataFrame([row_data], columns = ['Transaction Id', 'Block No', 'BNB Value'])
-                        print(df)
                         df = df.append(df_data, ignore_index = True)
+                        print(df)
                 else:
                     value_txn = 0            
                     if value_txn >= minimun_value_txn and to_chain in to_destiny:
                         row_data = [txn_hash, block_num, value_txn]
                         df_data = pd.DataFrame([row_data], columns = ['Transaction Id', 'Block No', 'BNB Value'])
-                        print(df)
                         df = df.append(df_data, ignore_index = True)
+                        print(df)
                                                                                          
         else:
             for txn in range(1,txn_found_last+1):
