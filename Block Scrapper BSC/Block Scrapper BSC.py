@@ -49,6 +49,7 @@ for block in blocks:
     df = pd.DataFrame()
     df2 = pd.DataFrame()
     
+    print(f'Bloque actual: {block}')
     print(df)
     print(df2)
     
