@@ -40,7 +40,7 @@ for block in blocks:
     url = 'https://bscscan.com/txs?block={}&p=1'.format(block)
     print(f'Bloque actual: {block}')
     driver.get(url)
-    #Here we order the scrapper to try finding the total number of pages for a block if such element that contains it exist
+    #Here we order the scrapper to try finding the total number of pages for a block if such element that contains it exists
     #if so, the scrapper will proceed to execute the rest of the procedure
     try:
         pages =  driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_topPageDiv"]/nav/ul/li[3]/span').text
