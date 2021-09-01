@@ -24,8 +24,10 @@ driver.implicitly_wait(10)
 
 #parameters for the scrapping
 #values for the example
-#Declaring a variable for looping over all the blocks
-blocks = np.arange(10479311, 10479314, 1)
+#Declaring several variables for looping over all the blocks
+initial_block = 10526521
+final_block = initial_block + 100
+blocks = np.arange(initial_block, final_block+1, 1)
 minimun_value_txn = 1.95
 to_chain = 'PancakeSwap: Router v2'
 BNB = 'BNB'
@@ -118,8 +120,8 @@ for block in blocks:
     except:
         print(f'El Bloque No. {block} NO CONTIENE UN CARAJO ¯\_₍⸍⸌̣ʷ̣̫⸍̣⸌₎_/¯, ¡SIGUIENTE! ')
 
-#export results to one single csv file
-df_final.to_csv('Block_10479311_to_10479313_1point95_BNB_PANCAKESWAPV2_without_duplicates_NOR_EMPTY_BLOCK_10479312.csv')
+#export results to one single csv file with a dynamic filename
+df_final.to_csv(f'Block_{initial_block}_to_{final_block}_1point95_BNB_PANCAKESWAPV2_without_duplicates_NOR_EMPTY_BLOCKS.csv')
 print(df_final)
 driver.quit()
 
