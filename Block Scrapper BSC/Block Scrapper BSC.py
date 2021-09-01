@@ -33,6 +33,7 @@ to_chain = 'PancakeSwap: Router v2'
 BNB = 'BNB'
 #set a final dataframe which will contain all the desired data from the arange that matches with the parameters set
 df_final = pd.DataFrame()
+dataframe_final = pd.DataFrame()
 
 #set a loop for each block from the arange.
 for block in blocks:
@@ -115,13 +116,16 @@ for block in blocks:
                             
         #delete every single duplicated row in the df for then adding it to the the final dataframe                
         df.drop_duplicates(subset='Transaction Id', keep='first', inplace= True)
+        df.drop_duplicates(subset='BNB Value', keep='first', inplace= True)
         df_final = df_final.append(df, ignore_index = True)
     #if such element doesn't exist, then the scrapper will print an statement informing it, for then proceeding to repeat the previous process with the next block.
     except:
         print(f'El Bloque No. {block} NO CONTIENE UN CARAJO ¯\_₍⸍⸌̣ʷ̣̫⸍̣⸌₎_/¯, ¡SIGUIENTE! ')
 
-#export results to one single csv file with a dynamic filename
-df_final.to_csv(f'Block_{initial_block}_to_{final_block}_1point95_BNB_PANCAKESWAPV2_without_duplicates_NOR_EMPTY_BLOCKS.csv')
+#delete every single duplicated row once again, then add this final df to another one for then exporting it as a single csv file with a dynamic filename
+df_final.drop_duplicates(subset='BNB Value', keep='first', inplace= True)
+dataframe_final = dataframe_final.append(df_final, ignore_index = True)
+dataframe_final.to_csv(f'Block_{initial_block}_to_{final_block}_1point95_BNB_PANCAKESWAPV2_without_duplicates_NOR_EMPTY_BLOCKS.csv')
 print(df_final)
 driver.quit()
 
