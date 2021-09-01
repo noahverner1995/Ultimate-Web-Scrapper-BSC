@@ -9,7 +9,7 @@ import re
 import pandas as pd
 from selenium import webdriver
 import numpy as np
-#import date library to know how much time takes this program takes for analyzing an specific interval of blocks
+#import date library to know how much time this program takes for analyzing an specific interval of blocks
 from datetime import datetime
 initial_time = datetime.now()
 
