@@ -47,7 +47,7 @@ for block in blocks:
     #Here we order the scrapper to try finding the total number of pages for a block if such element that contains it exists
     #if so, the scrapper will proceed to execute the rest of the procedure
     try:
-        pages =  driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_topPageDiv"]/nav/ul/li[3]/span').text
+        pages = driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_topPageDiv"]/nav/ul/li[3]/span').text
         pages = int(re.search(r'\d{0,3}$', pages).group())
         
         #FOR LOOP
