@@ -29,6 +29,7 @@ initial_block = 10526521
 final_block = initial_block + 100
 blocks = np.arange(initial_block, final_block+1, 1)
 minimun_value_txn = 1.95
+maximum_value_txn = 16.2
 to_chain = 'PancakeSwap: Router v2'
 BNB = 'BNB'
 #set a final dataframe which will contain all the desired data from the arange that matches with the parameters set
@@ -51,7 +52,7 @@ for block in blocks:
         
         #FOR LOOP
         #search at each page all the values we are looking for
-        #following conditions like number of the block, minimun value of the txn and the destiny
+        #following conditions like number of the block, minimun value and maximum value of the txn and the destiny
         
         df = pd.DataFrame()
         df2 = pd.DataFrame()
@@ -79,14 +80,14 @@ for block in blocks:
                     value_txn = str(driver.find_element_by_xpath('//*[@id="paywall_mask"]/table/tbody/tr[{}]/td[10]'.format(txn)).text)
                     if BNB in value_txn:
                         value_txn = float(value_txn.replace(' BNB','').replace(',',''))
-                        if value_txn >= minimun_value_txn and to_chain in to_destiny:
+                        if value_txn >= minimun_value_txn and value_txn < maximum_value_txn and to_chain in to_destiny:
                             row_data = [txn_hash, block_num, value_txn]
                             df_data = pd.DataFrame([row_data], columns = ['Transaction Id', 'Block No', 'BNB Value'])                        
                             df = df.append(df_data, ignore_index = True)
                             print(df)
                     else:
                         value_txn = 0            
-                        if value_txn >= minimun_value_txn and to_chain in to_destiny:
+                        if value_txn >= minimun_value_txn and value_txn < maximum_value_txn and to_chain in to_destiny:
                             row_data = [txn_hash, block_num, value_txn]
                             df_data = pd.DataFrame([row_data], columns = ['Transaction Id', 'Block No', 'BNB Value'])
                             df = df.append(df_data, ignore_index = True)
@@ -99,7 +100,7 @@ for block in blocks:
                     value_txn = str(driver.find_element_by_xpath('//*[@id="paywall_mask"]/table/tbody/tr[{}]/td[10]'.format(txn)).text)
                     if BNB in value_txn:
                         value_txn = float(value_txn.replace(' BNB','').replace(',',''))
-                        if value_txn >= minimun_value_txn and to_chain in to_destiny:
+                        if value_txn >= minimun_value_txn and value_txn < maximum_value_txn and to_chain in to_destiny:
                             row_data2 = [txn_hash, block_num, value_txn]
                             df_data2 = pd.DataFrame([row_data2], columns = ['Transaction Id', 'Block No', 'BNB Value'])
                             df2  = df2.append(df_data2, ignore_index = True)
@@ -107,7 +108,7 @@ for block in blocks:
                             df = df.append(df2, ignore_index = True)
                     else:
                         value_txn = 0                      
-                        if value_txn >= minimun_value_txn and to_chain in to_destiny:
+                        if value_txn >= minimun_value_txn and value_txn < maximum_value_txn and to_chain in to_destiny:
                             row_data2 = [txn_hash, block_num, value_txn]
                             df_data2 = pd.DataFrame([row_data2], columns = ['Transaction Id', 'Block No', 'BNB Value'])
                             df2  = df2.append(df_data2, ignore_index = True)
