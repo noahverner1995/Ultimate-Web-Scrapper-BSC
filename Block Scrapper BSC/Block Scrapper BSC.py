@@ -25,7 +25,11 @@ driver.implicitly_wait(10)
 #parameters for the scrapping
 #values for the example
 #Declaring several variables for looping over all the blocks
-initial_block = 10526521
+#Let's start scrapping automatically from the newest block
+link = 'https://bscscan.com/blocks'
+driver.get(link)
+#Here we use the Xpath element of the most recent block validated-
+initial_block = int(driver.find_element_by_xpath('//*[@id="content"]/div[2]/div/div/div[2]/table/tbody/tr[1]/td[1]/a').text)
 final_block = initial_block + 100
 blocks = np.arange(initial_block, final_block+1, 1)
 minimun_value_txn = 1.95
