@@ -17,6 +17,8 @@ initial_time = datetime.now()
 options = webdriver.ChromeOptions()
 #open driver without UI for automated testing
 options.add_argument('--headless')
+#remove warning in console
+options.add_argument("--log-level=3")
 #set the location of driver executable path and enable options for the driver
 driver = webdriver.Chrome(executable_path='C:/Users/ResetStoreX/AppData/Local/Programs/Python/Python39/Scripts/chromedriver.exe', options=options)
 #make the driver wait up to 10 seconds before doing anything
