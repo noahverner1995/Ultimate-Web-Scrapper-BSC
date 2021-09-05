@@ -54,8 +54,9 @@ for block in blocks:
     #if so, the scrapper will proceed to execute the rest of the procedure
     try:
         pages = driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_topPageDiv"]/nav/ul/li[3]/span').text
+        print(f'Leyendo información sobre el número de páginas de este bloque ... {pages}')
         pages = int(re.search(r'\d{0,3}$', pages).group())
-        
+        print(f'Este bloque posee {pages} páginas en total')
         #FOR LOOP
         #search at each page all the values we are looking for
         #following conditions like number of the block, minimun value and maximum value of the txn and the destiny
