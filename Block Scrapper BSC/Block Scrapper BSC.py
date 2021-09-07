@@ -4,7 +4,11 @@ Created on Sat Aug  7 19:32:50 2021
 
 @author: Noah Verner & @felipesalda
 """
-
+import os
+if os.name == 'nt': # Let's add some colors for the lulz
+    from ctypes import windll
+    k = windll.kernel32
+    k.SetConsoleMode(k.GetStdHandle(-11), 7)
 import re
 import pandas as pd
 from selenium import webdriver
@@ -48,7 +52,7 @@ for block in blocks:
     #look for general data of the link
     #amount of results and pages for the execution of the for loop, "block" variable is used within the {} 
     url = 'https://bscscan.com/txs?block={}&p=1'.format(block)
-    print(f'Bloque actual: {block}')
+    print(f'\u001b[42m Bloque actual: {block} \033[0m '+'\u001b[42m Bloque Final: '+str(final_block)+'\033[0m '+'\u001b[42m Bloques Restantes: '+str(final_block-block)+'\033[0m'+'\n')
     driver.get(url)
     #Here we order the scrapper to try finding the total number of pages for a block if such element that contains it exists
     #if so, the scrapper will proceed to execute the rest of the procedure
