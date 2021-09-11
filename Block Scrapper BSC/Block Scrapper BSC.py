@@ -13,8 +13,9 @@ import re
 import pandas as pd
 from selenium import webdriver
 import numpy as np
-#import date library to know how much time this program takes for analyzing an specific interval of blocks
+#import date library to know how much takes this program takes for analyzing an specific interval of blocks
 from datetime import datetime
+import time
 initial_time = datetime.now()
 
 #set webdriver
@@ -36,7 +37,7 @@ link = 'https://bscscan.com/blocks'
 driver.get(link)
 #Here we use the Xpath element of the most recent block validated-
 initial_block = int(driver.find_element_by_xpath('//*[@id="content"]/div[2]/div/div/div[2]/table/tbody/tr[1]/td[1]/a').text)
-final_block = initial_block + 100
+final_block = initial_block + 120
 blocks = np.arange(initial_block, final_block+1, 1)
 minimun_value_txn = 1.95
 maximum_value_txn = 16.2
@@ -45,7 +46,8 @@ BNB = 'BNB'
 #set a final dataframe which will contain all the desired data from the arange that matches with the parameters set
 df_final = pd.DataFrame()
 dataframe_final = pd.DataFrame()
-
+#set another final dataframe which will contain the projects which are likely to pump soon (2ND PART OF THE PROCESS)
+initial_df = pd.DataFrame()
 #set a loop for each block from the arange.
 for block in blocks:
     #INITIAL SEARCH
@@ -134,16 +136,205 @@ for block in blocks:
     except:
         print(f'El Bloque No. {block} NO CONTIENE UN CARAJO ¯\_₍⸍⸌̣ʷ̣̫⸍̣⸌₎_/¯, ¡SIGUIENTE! ')
 
-#delete every single duplicated row once again, then add this final df to another one for then exporting it as a single csv file with a dynamic filename
+#delete every single duplicated row once again, then add this final df to another one for then exporting it as a single csv file with a dynamic filename 
 df_final.drop_duplicates(subset='BNB Value', keep='first', inplace= True)
 dataframe_final = dataframe_final.append(df_final, ignore_index = True)
-dataframe_final.to_csv(f'Block_{initial_block}_to_{final_block}_1point95_BNB_PANCAKESWAPV2_without_duplicates_NOR_EMPTY_BLOCKS.csv')
-print(df_final)
-driver.quit()
 
+#Here's the second part of the process (filtering) <------------------------------------------------ IMPORTANT
+initial_df = initial_df.append(dataframe_final, ignore_index = True)
+filas_iniciales = len(initial_df)
+total_rows = len(initial_df)
+#Here we add some new columns that will contain some relevant data on the premium coins
+initial_df.insert(3,'Name Tag', None)
+initial_df.insert(4,'Contract Address', None)
+initial_df.insert(5,'Hodlers', None)
+initial_df.insert(6,'Transfers', None)
+initial_df.insert(7,'Age', None)
+initial_df.insert(8,'Date Taken', None)
+print('\n')
+print(f'Esta DataFrame tiene {total_rows} filas en total')
+print('\n')
+
+#Here we set a black_list of cryptocurrencies which are NOT interesting to us.
+lista_negra = {"BUSD": '0xe9e7cea3dedca5984780bafc599bd69add087d56', "Binance-Peg ETH": '0x2170ed0880ac9a755fd29b2688956bd959f933f8',
+               "Binance-Peg ADA": '0x3ee2200efb3400fabb9aacf31297cbdd1d435d47', "Binance-Peg BSC-USD": '0x55d398326f99059ff775485246999027b3197955',
+               "Binance-Peg XRP": '0x1d2f0da169ceb9fc7b3144628db156f3f6c60dbe', "Binance-Peg DOGE": '0xba2ae424d960c26247dd6c32edc70b295c744c43',
+               "Binance-Peg USDC": '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', "Binance-Peg DOT": '0x7083609fce4d1d8dc0c979aab8c869ea2c873402',
+               "Binance-Peg UNI": '0xbf5140a22578168fd562dccf235e5d43a02ce9b1', "Binance-Peg LINK": '0xf8a0bf9cf54bb92f17374d9e9a321e6a111a51bd',
+               "Binance-Peg LTC": '0x4338665cbb7b2485a8855a139b75d5e34ab0db94', "Binance-Peg BCH": '0x8ff795a6f4d97e7887c79bea79aba5cc76444adf',
+               "Binance-Peg AVAX": '0x1ce0c2827e2ef14d5c4f29a091d735a204794041', "Binance-Peg ETC": '0x3d6545b08693dae087e957cb1180ee38b9e3c25e',
+               "Binance-Peg DAI": '0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3', "Binance-Peg TRX": '0x85eac5ac2f758618dfa09bdbe0cf174e7d574d5b',
+               "Binance-Peg ATOM": '0x0eb3a705fc54725037cc9e008bdede697f62f335', "Binance-Peg EOS": '0x56b6fb708fc5732dec1afc8d8556423a2edccbd6',
+               "CAKE": '0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82', "Binance-Peg AXS": '0x715d400f88c167884bbcc41c5fea407ed4d2f8a0',
+               "Binance-Peg BTC": '0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c', "Binance-Peg FTM": '0xad29abb318791d579433d831ed122afeaf29dcfe',
+               "Binance-Peg BTT": '0x8595f9da7b868b1822194faed312235e43007b49', "Binance-Peg UST": '0x23396cf899ca06c4472205fc903bdb4de249d6fc',
+               "Binance-Peg SHIB": '0x2859e4544c4bb03966803b044a93563bd2d0dd4d', "Binance-Peg COMP": '0x52ce071bd9b1c4b00a0b92d298c512478cad67e8',
+               "Binance-Peg TUSD": '0x14016e85a25aeb13065688cafb43044c2ef86784', "Binance-Peg ZIL": '0xb86abcb37c3a4b64f74f59301aff131a1becc787',
+               "Binance-Peg BAT": '0x101d82428437127bf1608f699cd651e6abf9766e', "SAFEMOON": '0x8076c74c5e3f5852037f31ff0093eeb8c8add8d3',
+               "C98": '0xaec945e04baf28b135fa7c640f624f8d90f1c3a6', "Binance-Peg 1INCH": '0x111111111117dc0aa78b770fa6a738034120c302',
+               "Binance-Peg SXP": '0x47bead2563dcbf3bf2c9407fea4dc236faba485a', "TWT": '0x4b0f1812e5df2a09796481ff14017e6005508003',
+               "Binance-Peg MKR": '0x5f0da599bb2cccfcf6fdfd7d81743b6020864350', "BAKE": '0xE02dF9e3e622DeBdD69fb838bB799E3F168902c5',
+               "XVS": '0xcf6bb5389c92bdda8a3747ddb454cb7a64626c63', "Binance-Peg BAND": '0xad6caeb32cd2c308980a548bd0bc5aa4306c6c18',
+               "Binance-Peg REEF": '0xf21768ccbc73ea5b6fd3c687208a7c2def2d966e', "TLM": '0x2222227e22102fe3322098e4cbfe18cfebd57c95',
+               "Binance-Peg COTI": '0xadbaf88b39d37dc68775ed1541f1bf83a5a45feb', "ALICE": '0xac51066d7bec65dc4589368da368b212745d63e8',
+               "DODO": '0x67ee3cb086f8a16f34bee3ca72fad36f7db929e2', "vBTC": '0x882c173bc7ff3b7786ca16dfed3dfffb9ee7847b',
+               "ATA": '0xa2120b9e674d3fc3875f415a7df52e382f141225', "TKO": '0x9f589e3eabe42ebc94a44727b3f3531c0c877809',
+               "ALPACA": '0x8f0528ce5ef7b51152a59745befdd91d97091d2f', "vETH": '0xf508fcd89b8bd15579dc79a6827cb4686a3592c8',
+               "EPS": '0xa7f552078dcc247c2684336020c03648500c6d9f', "POLS": '0x7e624fa0e1c4abfd309cc15719b7e2580887f570',
+               "SFP": '0xd41fdb03ba84762dd66a0af1a6c8540ff1ba5dfb', "FEG": '0xacfc95585d80ab62f67a14c566c1b7a49fe91167',
+               "CTK": '0xa8c2b8eec3d368c0253ad3dae65a5f2bbb89c929', "LIT": '0xb59490ab09a0f526cc7305822ac65f2ab12f9723',
+               "Binance-Peg CREAM": '0xd4cb328a82bdf5f03eb737f37fa6b370aef3e888', "BZRX": '0x4b87642aedf10b642be4663db842ecc5a88bf5ba',
+               "VAI": '0x4bd17003473389a42daf6a0a729f6fdb328bbbd7', "RFOX": '0x0a3a21356793b49154fd3bbe91cbc2a16c0457f5',
+               "AUTO": '0xa184088a740c695e156f91f5cc086a06bb78b827', "FRONT": '0x928e55dab735aa8260af3cedada18b5f70c72f1b',
+               "BURGER": '0xae9269f27437f0fcbc232d39ec814844a51d6b8f', "CHESS": '0x20de22029ab63cf9a7cf5feb2b737ca1ee4c82a6',
+               "SPARTA": '0x3910db0600ea925f63c36ddb1351ab6e2c6eb102', "HTB": '0x4e840aadd28da189b9906674b4afcb77c128d9ea',
+               "SKILL": '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab', "LMT": '0x9617857e191354dbea0b714d78bc59e57c411087',
+               "SPORE": '0x33a3d962955a3862c8093d1273344719f03ca17c', "CTI": '0x3f670f65b9ce89b82e82121fd68c340ac22c08d6',
+               "EGG": '0xf952fc3ca7325cc27d15885d37117676d25bfda6', "SHIELD": '0x60b3bc37593853c04410c4f07fe4d6748245bf77',
+               "Binance-Peg BETH": '0x250632378e573c6be1ac2f97fcdf00515d0aa91b', "PASTA": '0xab9d0fae6eb062f2698c2d429a1be9185a5d4f6e',
+               "BOG": '0xb09fe1613fe03e7361319d2a43edc17422f36b09', "RISE": '0xc7d43f2b51f44f09fbb8a691a0451e8ffcf36c0a',
+               "CHI": '0x0000000000004946c0e9f43f4dee607b0ef1fa1c'}
+#here we set our beautiful counter to 0
+i=0
+#here we set the greatest final dataframe which will only contain good options to invest in
+dataframe_definitiva = pd.DataFrame()
+#let's do the fucking while loop bro
+while i < (len(initial_df)):
+    print(f'Analizando la fila #{i}')
+    check = initial_df['Transaction Id'].iloc[i]
+    print(f'Analizando la siguiente Id de transacción: {check}')
+    print('\n')
+    url = 'https://bscscan.com/tx/{}'.format(check)
+    driver.get(url)
+    #Here we check first if the Tx Id provided was a Success or a Failure, If Success, we continue with the process, else we delete the current row from the df and start again with the following one.
+    status = str(driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_maintable"]/div[2]/div[2]/span').text)
+    if status == 'Success':
+        print(f'Esta transacción tiene un status: {status}')        
+        #get the list that contains every single token that was transferred in the current Tx Id
+        token_list = driver.find_elements_by_xpath('/html/body/div[1]/main/div[3]/div[1]/div[2]/div[1]/div/div[7]/div[2]/ul/li/div/a')
+        #get the total number of rows the list above has
+        total_rows = len(token_list)
+        #create a new df to store and read the data more easily
+        df_token = pd.DataFrame()
+        #extract the Name Tag and the Link from the contract address of every single token the list above has
+        for token in token_list:    
+            #we use a dictionary trick here because this was the only way this shit worked properly lol
+            datos = {'Name': token.text, 'Address': token.get_attribute("href").replace('https://bscscan.com/token/','')}
+            print(datos)
+            #then we append the data above to the df_token, while ignoring the index, fuck the index
+            df_token = df_token.append(datos, ignore_index = True)                  
+        print(df_token)
+        #get the total number rows the df_token has
+        total_rows = len(df_token)
+        #here we start a while loop at the end of our df_token to read each token transferred til it finds our desired one.
+        while total_rows > 0:
+            print('\n')
+            print('Analizando el token de la fila #'+str(total_rows-1)+':')
+            #we need to save this information (Name Tag + Address) because it will be appended to the dataframe_definitiva
+            Name = df_token['Name'].iloc[total_rows-1]
+            Addresser = df_token['Address'].iloc[total_rows-1]
+            print('Palabras de filtrado: "LPs" o "WBNB"')
+            #we set these "LPs" and "WBNB" as words to avoid when reading df_token
+            matches = ["LPs", "WBNB"]
+            print(f'Este token se llama: {Name}')
+            if any(x in Name for x in matches):
+                print('la fila #'+str(total_rows-1)+' contiene un token con nombre "LP" o "BNB", procedo a descartarla y a seguir con la siguiente.')
+                #if true, we substract 1 to continue the while loop in our df_token
+                total_rows -= 1
+            else:
+                print('La fila #'+str(total_rows-1)+' contiene un token con nombre '+'"'+Name+'", '+'se ha encontrado el token deseado')
+                print(f'La dirección de contrato de este token es: {Addresser}')
+                print('\n')
+                print('A continuación se procede a verificar sí la anterior dirección de contrato inteligente está en "la lista negra" de contratos no deseados...')
+                #Now that we found our desired token, we check first if it exists in our lista_negra
+                if Addresser in lista_negra.values():
+                    print('\n')
+                    print(f'Qué pena, este contrato "{Addresser}" está en la lista negra, por ende no nos interesa y se procede a borrar su Tx Id de la df')
+                    initial_df = initial_df.drop(initial_df.index[i])
+                    print(initial_df)
+                    i +=1
+                    break
+                else:
+                    print('\n')
+                    print(f'Bien, parece que este contrato "{Addresser}" NO ESTÁ en la lista negra de contratos no deseados, vamos a aplicar más filtros...')
+                    url_2 = 'https://bscscan.com/token/{}'.format(Addresser)
+                    driver.get(url_2)
+                    print('\n')
+                    print('Evaluando número de HODLERS...')
+                    #In case our desired token doesn't exist in our lista_negra, we check now its current amount of hodlers
+                    Hodlers = int(driver.find_element_by_xpath('/html/body/div[1]/main/div[4]/div[1]/div[1]/div/div[2]/div[3]/div/div[2]/div/div').text.replace(',','').replace(' ','').replace('addresses',''))
+                    print(f'En este momento, esta criptomoneda tiene un total de {Hodlers} HODLERS')
+                    if Hodlers >= 3000 and Hodlers < 20000:
+                        print('\n')
+                        print('Dado que esta criptomoneda pasa este filtro de los HODLERS, procederemos a aplicar otro filtro')
+                        Transfers = driver.find_element_by_xpath('/html/body/div[1]/main/div[4]/div[1]/div[1]/div/div[2]/div[4]/div/div[2]/span').text.replace(',','')
+                        while Transfers == '-':
+                            Transfers = driver.find_element_by_xpath('/html/body/div[1]/main/div[4]/div[1]/div[1]/div/div[2]/div[4]/div/div[2]/span').text.replace(',','')
+                            if Transfers != '-':
+                                Transfers = int(Transfers)
+                                break
+                        print(f'Se han realizado hasta el momento un total de {Transfers} transferencias dentro de este contrato inteligente')
+                        #Assuming the amount of hodlers is greater than 3000 and less than 20000, we now check its number of transfers
+                        if int(Transfers) >= 2*Hodlers:
+                            print('Estupendo, esta criptomoneda cumple con el filtro de las transferencias, procederemos a aplicar un último filtro')
+                            url_3 = 'https://explorer.bitquery.io/bsc/token/{}'.format(Addresser)
+                            driver.get(url_3)
+                            print('\n')
+                            print('Evaluando la edad de esta criptomoneda...')
+                            time.sleep(6)
+                            contract_age = driver.find_element_by_xpath('/html/body/div[2]/div[3]/div/div[2]/div/div[2]/div/div[1]/div/div[1]/table/tbody/tr[9]/td[2]/span').text
+                            print(f'Esta criptomoneda tiene {contract_age} días de edad')
+                            #Assuming the number of transfers is at least 2 times the number of hodlers, we now check how old is our desired token (in days)
+                            if int(contract_age) < 26:
+                                print('Excelente, esta criptomoneda ha pasado todos los filtros, se procede a añadir información de su NameTag, Contract Address, Hodlers, Transfers, y Age a la nueva DataFrame junto con la fecha y hora en la que se tomó esta información')
+                                print(initial_df)
+                                #Now that our desired token has met all of our requirements, we are going to append its data to our dataframe_definitiva, including the current date and time at the moment this part is being executed
+                                hora_actual = time.ctime()
+                                initial_df.loc[initial_df.index[i], 'Name Tag'] = [Name]
+                                initial_df.loc[initial_df.index[i], 'Contract Address'] = [Addresser]
+                                initial_df.loc[initial_df.index[i], 'Hodlers'] = [Hodlers]
+                                initial_df.loc[initial_df.index[i], 'Transfers'] = [Transfers]
+                                initial_df.loc[initial_df.index[i], 'Age'] = [str(contract_age)+" days"]
+                                initial_df.loc[initial_df.index[i], 'Date Taken'] = [hora_actual]
+                                i +=1
+                                break
+                            else:
+                                print('Lastimomsamente, esta criptomoneda no pasó este último filtro, ya es muy vieja, procederemos a eliminarla de la lista de opciones, para luego seguir con la siguiente Tx Id')
+                                initial_df = initial_df.drop(initial_df.index[i])
+                                print(initial_df)
+                                i +=1
+                                break
+                                                        
+                        else:
+                            print('Ni modo, esta criptomoneda no pasó este filtro de las transferencias, procederemos a eliminarla de la lista de opciones, para luego seguir con la siguiente Tx Id')
+                            initial_df = initial_df.drop(initial_df.index[i])
+                            print(initial_df)
+                            i +=1
+                            break
+                    else: 
+                        if Hodlers < 3000 or Hodlers > 20000:
+                            print('Lamentablemente, esta criptomoneda no pasó este filtro de los HODLERS, procederemos a eliminarla de la lista de opciones, para luego seguir con la siguiente Tx Id')
+                            initial_df = initial_df.drop(initial_df.index[i])
+                            print(initial_df)
+                            i +=1
+                            break
+    else:
+        print("Esta transacción falló, se procede a eliminarla.")
+        initial_df = initial_df.drop(initial_df.index[i])
+        print(initial_df)
+        i +=1
+                
+driver.quit()
+dataframe_definitiva = dataframe_definitiva.append(initial_df, ignore_index = True)
+print(dataframe_definitiva)
+dataframe_definitiva = dataframe_definitiva.dropna()
+print(dataframe_definitiva)
+final_total_rows = len(dataframe_definitiva)
+print(f'Ahora esta nueva DataFrame tiene {final_total_rows} fila(s) en total, fueron eliminadas: '+str(filas_iniciales-final_total_rows)+' filas en total.')
+dataframe_definitiva.to_csv(f'PREMIUM_Block_{initial_block}_to_{final_block}_1point95_BNB_PANCAKESWAPV2_without_duplicates_NOR_EMPTY_BLOCKS.csv')
+print('\n')
 #set 2 variables to know how much time has passed since this program was run
 final_time = datetime.now()
 time_elapsed = final_time - initial_time
-
 #print the time elapsed
-print(f'Búsqueda finalizada ₍⸍⸌̣ʷ̣̫⸍̣⸌₎, Tiempo de Ejecución: {time_elapsed}')
+print(f'PROCESO FINALIZADO ʕ•́ᴥ•̀ʔっ♡, Tiempo de Ejecución: {time_elapsed}')
