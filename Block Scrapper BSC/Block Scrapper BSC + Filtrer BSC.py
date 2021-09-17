@@ -16,6 +16,10 @@ import numpy as np
 #import date library to know how much takes this program takes for analyzing an specific interval of blocks
 from datetime import datetime
 import time
+#import selenium functions to make sure the program will wait enough time before getting some data from pages
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 initial_time = datetime.now()
 
 #set webdriver
@@ -193,7 +197,17 @@ lista_negra = {"BUSD": '0xe9e7cea3dedca5984780bafc599bd69add087d56', "Binance-Pe
                "EGG": '0xf952fc3ca7325cc27d15885d37117676d25bfda6', "SHIELD": '0x60b3bc37593853c04410c4f07fe4d6748245bf77',
                "Binance-Peg BETH": '0x250632378e573c6be1ac2f97fcdf00515d0aa91b', "PASTA": '0xab9d0fae6eb062f2698c2d429a1be9185a5d4f6e',
                "BOG": '0xb09fe1613fe03e7361319d2a43edc17422f36b09', "RISE": '0xc7d43f2b51f44f09fbb8a691a0451e8ffcf36c0a',
-               "CHI": '0x0000000000004946c0e9f43f4dee607b0ef1fa1c'}
+               "CHI": '0x0000000000004946c0e9f43f4dee607b0ef1fa1c', "POCO": '0x394bba8f309f3462b31238b3fd04b83f71a98848',
+               "MWAR": '0xf8a1919da520a6c3b92e6abc64bf83c8d4432b14', "GON": '0x610f34da19797405a276d26f95bd5c7d8cbbd644',
+               "BIN": '0xe56842ed550ff2794f010738554db45e60730371', "AIR": '0xd8a2ae43fd061d24acd538e3866ffc2c05151b53',
+               "NFTL": '0xe7f72bc0252ca7b16dbb72eeee1afcdb2429f2dd', "ULTI": '0x42bfe4a3e023f2c90aebffbd9b667599fa38514f',
+               "DZOO": '0x5419291d81c68c103363e06046f40a9056ab2b7f', "PEARL": '0x118b60763002f3ba7603a3c17f946a0c7dab789f',
+               "LORD": '0x2daf1a83aa348afbcbc73f63bb5ee3154d9f5776', "MPS": '0x9eb5b7902d2be0b5aaba2f096e043d3cd804e6df',
+               "ADAPAD": '0xdb0170e2d0c1cc1b2e7a90313d9b9afa4f250289', "WAG": '0x7fa7df4996ac59f398476892cfb195ed38543520',
+               "DOGEX": '0x1f6819d87bd6e10cae34883175232ee9774e00b2', "BPET": '0x24d787e9b88cb62d74e961c1c1d78e4ee47618e5',
+               "HONEYPAD": '0xdb607c61aaa2a954bf1f9d117953f12d6c319e15', "ECC": '0x8d047f4f57a190c96c8b9704b39a1379e999d82b',
+               "HoneyPadDividendTracker": '0x2c65debf3c7671cb79340bddb0893fbb0d5accd7', "MEDA": '0x9130990dd16ed8be8be63e46cad305c2c339dac9',
+               "MONS": '0xe4c797d43631f4d660ec67b5cb0b78ef5c902532', "IDTT": '0x6fb1e018f107d3352506c23777e4cd62e063584a'}
 #here we set our beautiful counter to 0
 i=0
 #here we set the greatest final dataframe which will only contain good options to invest in
@@ -212,6 +226,7 @@ while i < (len(initial_df)):
         print(f'Esta transacción tiene un status: {status}')        
         #get the list that contains every single token that was transferred in the current Tx Id
         token_list = driver.find_elements_by_xpath('/html/body/div[1]/main/div[3]/div[1]/div[2]/div[1]/div/div[7]/div[2]/ul/li/div/a')
+        print(token_list)
         #get the total number of rows the list above has
         total_rows = len(token_list)
         #create a new df to store and read the data more easily
@@ -281,7 +296,7 @@ while i < (len(initial_df)):
                             driver.get(url_3)
                             print('\n')
                             print('Evaluando la edad de esta criptomoneda...')
-                            time.sleep(6)
+                            WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div[3]/div/div[2]/div/div[2]/div/div[1]/div/div[1]/table/tbody/tr[9]/td[2]/span')))
                             contract_age = driver.find_element_by_xpath('/html/body/div[2]/div[3]/div/div[2]/div/div[2]/div/div[1]/div/div[1]/table/tbody/tr[9]/td[2]/span').text
                             print(f'Esta criptomoneda tiene {contract_age} días de edad')
                             #Assuming the number of transfers is at least 2 times the number of hodlers, we now check how old is our desired token (in days)
@@ -325,6 +340,8 @@ while i < (len(initial_df)):
         i +=1
                 
 driver.quit()
+#here we delete duplicated rows just in case they appear at the end of our second part of the process, we use "Contract Address" as parameter.
+initial_df.drop_duplicates(subset='Contract Address', keep='first', inplace= True)
 dataframe_definitiva = dataframe_definitiva.append(initial_df, ignore_index = True)
 print(dataframe_definitiva)
 dataframe_definitiva = dataframe_definitiva.dropna()
