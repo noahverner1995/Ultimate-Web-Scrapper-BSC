@@ -140,7 +140,8 @@ for block in blocks:
     except:
         print(f'El Bloque No. {block} NO CONTIENE UN CARAJO ¯\_₍⸍⸌̣ʷ̣̫⸍̣⸌₎_/¯, ¡SIGUIENTE! ')
 
-#delete every single duplicated row once again, then add this final df to another one for then exporting it as a single csv file with a dynamic filename 
+#delete every single duplicated row once again, then add this final df to another one
+#this is because a bot may appear asking swap a very large amount of BNB and its transaction fails because there's not enough liquidity, making it loop until it's done
 df_final.drop_duplicates(subset='BNB Value', keep='first', inplace= True)
 dataframe_final = dataframe_final.append(df_final, ignore_index = True)
 
@@ -207,7 +208,11 @@ lista_negra = {"BUSD": '0xe9e7cea3dedca5984780bafc599bd69add087d56', "Binance-Pe
                "DOGEX": '0x1f6819d87bd6e10cae34883175232ee9774e00b2', "BPET": '0x24d787e9b88cb62d74e961c1c1d78e4ee47618e5',
                "HONEYPAD": '0xdb607c61aaa2a954bf1f9d117953f12d6c319e15', "ECC": '0x8d047f4f57a190c96c8b9704b39a1379e999d82b',
                "HoneyPadDividendTracker": '0x2c65debf3c7671cb79340bddb0893fbb0d5accd7', "MEDA": '0x9130990dd16ed8be8be63e46cad305c2c339dac9',
-               "MONS": '0xe4c797d43631f4d660ec67b5cb0b78ef5c902532', "IDTT": '0x6fb1e018f107d3352506c23777e4cd62e063584a'}
+               "MONS": '0xe4c797d43631f4d660ec67b5cb0b78ef5c902532', "IDTT": '0x6fb1e018f107d3352506c23777e4cd62e063584a',
+               "GLMS": '0x75f53011f6d51c60e6dcbf54a8b1bcb54f07f0c9', "XPNET": '0x8cf8238abf7b933bf8bb5ea2c7e4be101c11de2a',
+               "ZOO": '0x19263f2b4693da0991c4df046e4baa5386f5735e', "BIT": '0xc864019047b864b6ab609a968ae2725dfaee808a',
+               "ETERNAL": '0xd44fd09d74cd13838f137b590497595d6b3feea4', "MONS": '0xe4c797d43631f4d660ec67b5cb0b78ef5c902532',
+               "APAD": '0x366d71ab095735b7dae83ce2b82d5262ef655f10' }
 #here we set our beautiful counter to 0
 i=0
 #here we set the greatest final dataframe which will only contain good options to invest in
@@ -296,9 +301,22 @@ while i < (len(initial_df)):
                             driver.get(url_3)
                             print('\n')
                             print('Evaluando la edad de esta criptomoneda...')
-                            WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div[3]/div/div[2]/div/div[2]/div/div[1]/div/div[1]/table/tbody/tr[9]/td[2]/span')))
-                            contract_age = driver.find_element_by_xpath('/html/body/div[2]/div[3]/div/div[2]/div/div[2]/div/div[1]/div/div[1]/table/tbody/tr[9]/td[2]/span').text
-                            print(f'Esta criptomoneda tiene {contract_age} días de edad')
+                            #Right below, we are going to set a new while loop to make sure that the contract_age element is going to be located and readable when needed
+                            #But first, we set our counter (x) to 0
+                            x = 0
+                            while x < 100:
+                                try:
+                                    WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div[3]/div/div[2]/div/div[2]/div/div[1]/div/div[1]/table/tbody/tr[9]/td[2]/span')))
+                                    contract_age = driver.find_element_by_xpath('/html/body/div[2]/div[3]/div/div[2]/div/div[2]/div/div[1]/div/div[1]/table/tbody/tr[9]/td[2]/span').text
+                                    #If contract_age element is located and read, Bingo, problem is no more!
+                                    print(f'Esta criptomoneda tiene {contract_age} días de edad')
+                                    x = 0
+                                    break
+                                except:
+                                    #Else, this bitch is going to sleep tight for 2 seconds for then repeating the loop until problem is no more!
+                                    print('Joder, no encontré este elemento en el tiempo deseado (-_-), lo intentaré de nuevo...')
+                                    time.sleep(3)
+                                    x += 1                                     
                             #Assuming the number of transfers is at least 2 times the number of hodlers, we now check how old is our desired token (in days)
                             if int(contract_age) < 26:
                                 print('Excelente, esta criptomoneda ha pasado todos los filtros, se procede a añadir información de su NameTag, Contract Address, Hodlers, Transfers, y Age a la nueva DataFrame junto con la fecha y hora en la que se tomó esta información')
