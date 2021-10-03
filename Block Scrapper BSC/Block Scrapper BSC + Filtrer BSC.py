@@ -34,7 +34,7 @@ driver = webdriver.Chrome(executable_path='C:/Users/ResetStoreX/AppData/Local/Pr
 #Here we start to automate the big process down below
 #First we set our counter (y) to 1
 y = 1
-#Now we set the amount of reruns (limite) to 4
+#Now we set the amount of reruns (limite) to 4, this means this loop will run 3 times, because it starts in 1, not in 0
 limite = 4
 #Here's where the party begins
 while y < limite:
@@ -45,27 +45,14 @@ while y < limite:
     #values for the example
     #Declaring several variables for looping over all the blocks
     #Let's start scrapping automatically from the newest block
-    link = 'https://explorer.bitquery.io/bsc'
+    link = 'https://bscscan.com/blocks'
     driver.get(link)
-    #Right below, we are going to set a new while loop to make sure that the initial_block element is going to be located and readable when needed
-    #But first, we set our counter (w) to 0
-    w = 0
-    while w < 100:
-        try:
-            #Here we use the Xpath element of the most recent block validated in bitquery explorer
-            initial_block = int(driver.find_element_by_xpath('/html/body/div[2]/div[3]/div/div/div/div[2]/div/div[1]/div/div[1]/table/tbody/tr[1]/td[2]/span/a').text)
-            #If initial_block element is located and read, Bingo, problem is no more!
-            print(f'El bloque inicial para este proceso es el No. {initial_block} ')
-            w = 0
-            break
-        except:
-            #Else, this bitch is going to sleep tight for 3 seconds for then repeating the loop until problem is no more!
-            print('Joder, no encontré este elemento en el tiempo deseado (-_-), lo intentaré de nuevo...')
-            time.sleep(3)
-            w += 1 
+    #Here we use the Xpath element of the most recent block validated in bitquery explorer
+    initial_block = int(driver.find_element_by_xpath('//*[@id="content"]/div[2]/div/div/div[2]/table/tbody/tr[1]/td[1]/a').text)
+    print(f'El bloque inicial para este proceso es el No. {initial_block}')   
     final_block = initial_block + 120
     #It seems that the current most recent validated block from bitquery explorer is delayed by around 57 blocks to BscScan, so for the blocks arange, initial_block element is incremented in 48
-    blocks = np.arange(initial_block+48, final_block+1, 1)
+    blocks = np.arange(initial_block, final_block+1, 1)
     minimun_value_txn = 1.95
     maximum_value_txn = 16.2
     to_chain = 'PancakeSwap: Router v2'
@@ -240,7 +227,9 @@ while y < limite:
                    "HER": '0x6b9f6f911384886b2e622e406327085238f8a3c5', "FNDZ": '0x7754c0584372d29510c019136220f91e25a8f706',
                    "THG": '0x9fd87aefe02441b123c3c32466cd9db4c578618f', "ForeverFOMO": '0x95637d4fbe7153dcc3e26e71bde7a2d82621f083',
                    "GRX": '0x8fba8c1f92210f24fb277b588541ac1952e1aac8', "DSBOWL": '0x6a43f8f4b12fcd3b3eb86b319f92eb17c955dda3',
-                   "DOX": '0x30ea7c369b87fe261de28a1eefafe806696a738b'}
+                   "DOX": '0x30ea7c369b87fe261de28a1eefafe806696a738b', "GZONE":'0xb6adb74efb5801160ff749b1985fd3bd5000e938',
+                   "BabyFloki": '0x71e80e96af604afc23ca2aed4c1c7466db6dd0c4', "GHC":'0x683fae4411249ca05243dfb919c20920f3f5bfe0',
+                   "KING": '0x0ccd575bf9378c06f6dca82f8122f570769f00c2', "BEPR": '0xbf0cf158e84ebacca1b7746e794d507073e5adfe'}
     #here we set our beautiful counter to 0
     i=0
     #here we set the greatest final dataframe which will only contain good options to invest in
@@ -407,9 +396,13 @@ while y < limite:
     dataframe_definitiva = dataframe_definitiva.dropna()
     print(dataframe_definitiva)
     final_total_rows = len(dataframe_definitiva)
-    print(f'Ahora esta nueva DataFrame tiene {final_total_rows} fila(s) en total, fueron eliminadas: '+str(filas_iniciales-final_total_rows)+' filas en total.')
-    dataframe_definitiva.to_csv(f'PREMIUM_Block_{initial_block}_to_{final_block}_1point95_BNB_PANCAKESWAPV2_without_duplicates_NOR_EMPTY_BLOCKS.csv')
-    print('\n')
+    #Now here we make sure that we are going to export only non-empty dfs.
+    if final_total_rows == 0:
+        print('Qué mal, al final de todo el proceso esta dataframe estuvo vacía (=/)')
+    else:
+        print(f'Ahora esta nueva DataFrame tiene {final_total_rows} fila(s) en total, fueron eliminadas: '+str(filas_iniciales-final_total_rows)+' filas en total.')
+        dataframe_definitiva.to_csv(f'PREMIUM_Block_{initial_block}_to_{final_block}_1point95_BNB_PANCAKESWAPV2_without_duplicates_NOR_EMPTY_BLOCKS.csv')
+        print('\n')
     #set 2 variables to know how much time has passed since this program was run
     final_time = datetime.now()
     time_elapsed = final_time - initial_time
@@ -417,14 +410,14 @@ while y < limite:
     print(f'PROCESO FINALIZADO ʕ•́ᴥ•̀ʔっ♡, Tiempo de Ejecución: {time_elapsed}')
     print('\n')
     y += 1
-    time.sleep(3)
-    print('\033[46mAhora vamos a esperar un tiempo antes de repetir el proceso anterior :)')
-    time.sleep(5)
+    time.sleep(3)       
     #Here we re-instantiate the driver again to avoid a MaxRetryError
     driver = webdriver.Chrome(executable_path='C:/Users/ResetStoreX/AppData/Local/Programs/Python/Python39/Scripts/chromedriver.exe', options=options)
-    #Now we set our delay time (seconds) randomly from 422 seconds to 827 seconds
-    seconds = random.randint(422, 827)
-    if y <= limite: 
+    #Now we set our delay time (seconds) randomly from 22 seconds to 87 seconds
+    seconds = random.randint(22, 87)
+    if y < limite:
+        time.sleep(5)
+        print('\033[46mAhora vamos a esperar un tiempo antes de repetir el proceso anterior :)')
         for o in range(seconds):
             if seconds - o == 1:
                 print(f'\u001b[43mFalta {seconds - o} segundo para repetir el proceso anterior')
