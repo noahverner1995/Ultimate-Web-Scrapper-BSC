@@ -218,29 +218,26 @@ while y < limite:
         driver.get(url)
         #Here we check first if the Tx Id provided was a Success or a Failure, If Success, we continue with the process, else we delete the current row from the df and start again with the following one.
         #However, firstly we are going to set a new while loop to make sure that the status element is going to be located and readable when needed
-        #Also, We are going to make sure that the "Tokens Transferred" counter is less or equal to 5 
         #But first, we set our counter (z) to 0
         z = 0
         while z < 100:
             try:
                 WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH,'//*[@id="ContentPlaceHolder1_maintable"]/div[2]/div[2]/span')))
-                status = str(driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_maintable"]/div[2]/div[2]/span').text)
-                if status != 'Success':
-                    print('Qué mal, esta transacción falló')
-                    tokens_transferred = int(driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_maintable"]/div[7]/div[1]/div/span[2]').text)
-                    z = 0
-                    break
-                else:
-                    tokens_transferred = int(driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_maintable"]/div[7]/div[1]/div/span[2]').text)
-                    #If status element is located and read, Bingo, problem is no more!
-                    z = 0
-                    break
+                status = str(driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_maintable"]/div[2]/div[2]/span').text) 
+                print(f'Esta transacción tiene un estado {status}')
+                break        
             except:
                 #Else, this bitch is going to sleep tight for 3 seconds for then repeating the loop until problem is no more!
                 print('Joder, el estado de esta transacción aún no es visible (-_-"), lo intentaré de nuevo...')
                 time.sleep(3)
                 z += 1
-        if status == 'Success' and tokens_transferred <= 5:
+        if status != 'Success':
+            print('Qué mal, esta transacción falló')
+            tokens_transferred = 0
+        else:
+            tokens_transferred = int(driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_maintable"]/div[7]/div[1]/div/span[2]').text)
+        #Also, We are going to make sure that the "Tokens Transferred" counter is less or equal to 5 and greater than 0
+        if status == 'Success' and tokens_transferred <= 5 and tokens_transferred > 0:
             print(f'Esta transacción tiene un status: {status} y la siguiente cantidad de tokens transferidos: {tokens_transferred}')
             #get the list that contains every single token that was transferred in the current Tx Id
             token_list = driver.find_elements_by_xpath('/html/body/div[1]/main/div[3]/div[1]/div[2]/div[1]/div/div[7]/div[2]/ul/li/div/a')
@@ -297,7 +294,7 @@ while y < limite:
                         #In case our desired token doesn't exist in our lista_negra, we check now its current amount of hodlers
                         Hodlers = int(driver.find_element_by_xpath('/html/body/div[1]/main/div[4]/div[1]/div[1]/div/div[2]/div[3]/div/div[2]/div/div').text.replace(',','').replace(' ','').replace('addresses',''))
                         print(f'En este momento, esta criptomoneda tiene un total de {Hodlers} HODLERS')
-                        if Hodlers >= 3000 and Hodlers < 20000:
+                        if Hodlers >= 3400 and Hodlers < 20000:
                             print('\n')
                             print('Dado que esta criptomoneda pasa este filtro de los HODLERS, procederemos a aplicar otro filtro')
                             Transfers = driver.find_element_by_xpath('/html/body/div[1]/main/div[4]/div[1]/div[1]/div/div[2]/div[4]/div/div[2]/span').text.replace(',','')
@@ -323,7 +320,6 @@ while y < limite:
                                         contract_age = driver.find_element_by_xpath('/html/body/div[2]/div[3]/div/div[2]/div/div[2]/div/div[1]/div/div[1]/table/tbody/tr[9]/td[2]/span').text
                                         #If contract_age element is located and read, Bingo, problem is no more!
                                         print(f'Esta criptomoneda tiene {contract_age} días de edad')
-                                        x = 0
                                         break
                                     except:
                                         #Else, this bitch is going to sleep tight for 3 seconds for then repeating the loop until problem is no more!
@@ -358,7 +354,7 @@ while y < limite:
                                 i +=1
                                 break
                         else: 
-                            if Hodlers < 3000 or Hodlers > 20000:
+                            if Hodlers < 3400 or Hodlers > 20000:
                                 print('Lamentablemente, esta criptomoneda no pasó este filtro de los HODLERS, procederemos a eliminarla de la lista de opciones, para luego seguir con la siguiente Tx Id')
                                 initial_df = initial_df.drop(initial_df.index[i])
                                 print(initial_df)
