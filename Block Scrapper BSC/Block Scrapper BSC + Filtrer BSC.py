@@ -240,7 +240,7 @@ while y < limite:
         if status == 'Success' and tokens_transferred <= 5 and tokens_transferred > 0:
             print(f'Esta transacción tiene un status: {status} y la siguiente cantidad de tokens transferidos: {tokens_transferred}')
             #get the list that contains every single token that was transferred in the current Tx Id
-            token_list = driver.find_elements_by_xpath('/html/body/div[1]/main/div[3]/div[1]/div[2]/div[1]/div/div[7]/div[2]/ul/li/div/a')
+            token_list = driver.find_elements_by_xpath('/html/body/div[1]/main/div[3]/div[1]/div[2]/div[1]/div/div[7]/div[2]/ul/li/div/a').text
             print(token_list)
             #get the total number of rows the list above has
             total_rows = len(token_list)
