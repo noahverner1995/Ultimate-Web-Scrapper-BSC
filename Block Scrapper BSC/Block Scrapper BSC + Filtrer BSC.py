@@ -203,7 +203,11 @@ while y < limite:
                    "KING": '0x0ccd575bf9378c06f6dca82f8122f570769f00c2', "BEPR": '0xbf0cf158e84ebacca1b7746e794d507073e5adfe', "KITE": '0xede26a1ee14281b58a5238a3ff246b02358a13b6', "PKN": '0x4b5decb9327b4d511a58137a1ade61434aacdd43',
                    "MiniFloki_Dividend_Tracker": '0xa9707c110aa656245472a01c229b74887439d15b', "BCOIN": '0x00e1656e45f18ec6747f5a8496fd39b50b38396d', "EGC": '0xc001bbe2b87079294c63ece98bdd0a88d761434e', "EPICHERO": '0x47cc5334f65611ea6be9e933c49485c88c17f5f0',
                    "CODI": '0x4ac32178097c1f62beadcc2d215b54d6915013ee', "SPHYNX": '0x2e121ed64eeeb58788ddb204627ccb7c7c59884c', "FLOKIN": '0x97ea5efdcb5961a99ba5c96123042507c0210ec1', "WOJ": '0x55f96c7005d7c684a65ee653b07b5fe1507c56ab',
-                   "MAT": '0xf3147987a00d35eecc10c731269003ca093740ca'}
+                   "MAT": '0xf3147987a00d35eecc10c731269003ca093740ca', "FOMOBABY": '0x82d6e409438e9c2eaed8ceec4bd95918cbd17c87', "LIGHT": '0x037838b556d9c9d654148a284682c55bb5f56ef4', "MUSK": '0x57c84b307735d19e514b4ada2826f540910ffa48',
+                   "BNBCH": '0x840bcd536d647c3433bf830dbcb8debfa5b71c79', "HPAD": '0x7009bd9a1369e74457cdac84191ca83f33e89217', "HE": '0x20d39a5130f799b95b55a930e5b7ebc589ea9ed8', "RENA": '0xa9d75cc3405f0450955050c520843f99aff8749d',
+                   "BabyFlokiCoin": '0x808fac147a9c02723d0be300ac4753eaf93c0e1f', "ASTRO": '0x72eb7ca07399ec402c5b7aa6a65752b6a1dc0c27', "POKERFI": '0xfe073c3b891325ae8686d9cf2c8b3586674f7be2', "BETA": '0xbe1a001fe942f96eea22ba08783140b9dcc09d28',
+                   "ZOO2": '0x7ffc1243232da3ac001994208e2002816b57c669', "GRM": '0x7472e4f397e46eb371fe4c8e078cfda46d72415f', "Khalifa": '0xdae7238a7e83b439673a7900fa3bae2108c6ec12', "$Shibx": '0xaa357b0f167923efc1d6978a868f81866ca6e98c',
+                   "IUP": '0xc6f26e6df5f44c0ccd939581987c09b866cdbd1a', "BSCPAD": '0x5a3010d4d8d3b5fb49f8b6e57fb9e48063f16700'}
     #here we set our beautiful counter to 0
     i=0
     #here we set the greatest final dataframe which will only contain good options to invest in
@@ -228,8 +232,10 @@ while y < limite:
                 break        
             except:
                 #Else, this bitch is going to sleep tight for 3 seconds for then repeating the loop until problem is no more!
-                print('Joder, el estado de esta transacción aún no es visible (-_-"), lo intentaré de nuevo...')
-                time.sleep(3)
+                print(f'Intento: {z} - Joder, el estado de esta transacción aún no es visible (-_-"), lo intentaré de nuevo...')
+                time.sleep(2.3)
+                driver.refresh()
+                time.sleep(4)
                 z += 1
         if status != 'Success':
             print('Qué mal, esta transacción falló')
@@ -292,9 +298,23 @@ while y < limite:
                         print('\n')
                         print('Evaluando número de HODLERS...')
                         #In case our desired token doesn't exist in our lista_negra, we check now its current amount of hodlers
-                        Hodlers = int(driver.find_element_by_xpath('/html/body/div[1]/main/div[4]/div[1]/div[1]/div/div[2]/div[3]/div/div[2]/div/div').text.replace(',','').replace(' ','').replace('addresses',''))
-                        print(f'En este momento, esta criptomoneda tiene un total de {Hodlers} HODLERS')
-                        if Hodlers >= 3400 and Hodlers < 20000:
+                        #Again, firstly we are going to set a new while loop to make sure that the No. of Hodlers element is going to be located and readable when needed
+                        #But first, we set our counter (z) to 0
+                        z = 0
+                        while z < 100:
+                            try:
+                                WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[1]/main/div[4]/div[1]/div[1]/div/div[2]/div[3]/div/div[2]/div/div')))                        
+                                Hodlers = int(driver.find_element_by_xpath('/html/body/div[1]/main/div[4]/div[1]/div[1]/div/div[2]/div[3]/div/div[2]/div/div').text.replace(',','').replace(' ','').replace('addresses',''))
+                                print(f'Este contrato tiene posee esta cantidad de hodlers: {Hodlers}')
+                                break
+                            except:
+                                #Else, this bitch is going to sleep tight for 3 seconds for then repeating the loop until problem is no more!
+                                print(f'Intento: {z} - Joder, el número de hodlers de esta dirección aún no es visible (-_-"), lo intentaré de nuevo...')
+                                time.sleep(3.5)
+                                driver.refresh()
+                                time.sleep(4.5)
+                                z += 1
+                        if Hodlers >= 5600 and Hodlers < 20000:
                             print('\n')
                             print('Dado que esta criptomoneda pasa este filtro de los HODLERS, procederemos a aplicar otro filtro')
                             Transfers = driver.find_element_by_xpath('/html/body/div[1]/main/div[4]/div[1]/div[1]/div/div[2]/div[4]/div/div[2]/span').text.replace(',','')
@@ -305,12 +325,13 @@ while y < limite:
                                     break
                             print(f'Se han realizado hasta el momento un total de {Transfers} transferencias dentro de este contrato inteligente')
                             #Assuming the amount of hodlers is greater than 3000 and less than 20000, we now check its number of transfers
-                            if int(Transfers) >= 2*Hodlers:
+                            if int(Transfers) >= 3*Hodlers:
                                 print('Estupendo, esta criptomoneda cumple con el filtro de las transferencias, procederemos a aplicar un último filtro')
                                 url_3 = 'https://explorer.bitquery.io/bsc/token/{}'.format(Addresser)
                                 driver.get(url_3)
                                 print('\n')
                                 print('Evaluando la edad de esta criptomoneda...')
+                                time.sleep(4)
                                 #Right below, we are going to set a new while loop to make sure that the contract_age element is going to be located and readable when needed
                                 #But first, we set our counter (x) to 0
                                 x = 0
@@ -323,8 +344,10 @@ while y < limite:
                                         break
                                     except:
                                         #Else, this bitch is going to sleep tight for 3 seconds for then repeating the loop until problem is no more!
-                                        print('Joder, no encontré este elemento en el tiempo deseado (-_-), lo intentaré de nuevo...')
+                                        print(f'Intento: {x} - Joder, no encontré este elemento en el tiempo deseado (-_-), lo intentaré de nuevo...')                                        
                                         time.sleep(3)
+                                        driver.refresh()
+                                        time.sleep(5)
                                         x += 1                                     
                                 #Assuming the number of transfers is at least 2 times the number of hodlers, we now check how old is our desired token (in days)
                                 if int(contract_age) < 26:
@@ -354,7 +377,7 @@ while y < limite:
                                 i +=1
                                 break
                         else: 
-                            if Hodlers < 3400 or Hodlers > 20000:
+                            if Hodlers < 5600 or Hodlers > 20000:
                                 print('Lamentablemente, esta criptomoneda no pasó este filtro de los HODLERS, procederemos a eliminarla de la lista de opciones, para luego seguir con la siguiente Tx Id')
                                 initial_df = initial_df.drop(initial_df.index[i])
                                 print(initial_df)
