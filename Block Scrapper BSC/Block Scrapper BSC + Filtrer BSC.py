@@ -4,12 +4,19 @@ Created on Sat Aug  7 19:32:50 2021
 
 @author: Noah Verner & @felipesalda
 """
+#Initial Installs in case of deploying this program in a new virtual environment
+#%%bash
+#sudo apt-get update
+#sudo apt-get install chromium-driver -y
+#!pip install selenium==3.141.0
+#!pip install webdriver_manager==3.4.2
 import os
 if os.name == 'nt': # Let's add some colors for the lulz
     from ctypes import windll
     k = windll.kernel32
     k.SetConsoleMode(k.GetStdHandle(-11), 7)
 import re
+import json
 import random
 import pandas as pd
 from selenium import webdriver
@@ -50,10 +57,10 @@ while y < limite:
     #Here we use the Xpath element of the most recent block validated BscScan
     initial_block = int(driver.find_element_by_xpath('//*[@id="content"]/div[2]/div/div/div[2]/table/tbody/tr[1]/td[1]/a').text)
     print(f'El bloque inicial para este proceso es el No. {initial_block}')   
-    final_block = initial_block + 120
+    final_block = initial_block + 100
     #It seems that the current most recent validated block from bitquery explorer is delayed by around 57 blocks to BscScan, so for the blocks arange, initial_block element is incremented in 48
     blocks = np.arange(initial_block, final_block+1, 1)
-    minimun_value_txn = 1.95
+    minimun_value_txn = 2.15
     maximum_value_txn = 16.2
     to_chain = 'PancakeSwap: Router v2'
     BNB = 'BNB'
@@ -170,44 +177,11 @@ while y < limite:
     print(f'Esta DataFrame tiene {total_rows} filas en total')
     print('\n')
     
-    #Here we set a black_list of cryptocurrencies which are NOT interesting to us.
-    lista_negra = {"BUSD": '0xe9e7cea3dedca5984780bafc599bd69add087d56', "Binance-Peg ETH": '0x2170ed0880ac9a755fd29b2688956bd959f933f8', "Binance-Peg ADA": '0x3ee2200efb3400fabb9aacf31297cbdd1d435d47', "Binance-Peg BSC-USD": '0x55d398326f99059ff775485246999027b3197955',
-                   "Binance-Peg XRP": '0x1d2f0da169ceb9fc7b3144628db156f3f6c60dbe', "Binance-Peg DOGE": '0xba2ae424d960c26247dd6c32edc70b295c744c43', "Binance-Peg USDC": '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', "Binance-Peg DOT": '0x7083609fce4d1d8dc0c979aab8c869ea2c873402',
-                   "Binance-Peg UNI": '0xbf5140a22578168fd562dccf235e5d43a02ce9b1', "Binance-Peg LINK": '0xf8a0bf9cf54bb92f17374d9e9a321e6a111a51bd', "Binance-Peg LTC": '0x4338665cbb7b2485a8855a139b75d5e34ab0db94', "Binance-Peg BCH": '0x8ff795a6f4d97e7887c79bea79aba5cc76444adf',
-                   "Binance-Peg AVAX": '0x1ce0c2827e2ef14d5c4f29a091d735a204794041', "Binance-Peg ETC": '0x3d6545b08693dae087e957cb1180ee38b9e3c25e', "Binance-Peg DAI": '0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3', "Binance-Peg TRX": '0x85eac5ac2f758618dfa09bdbe0cf174e7d574d5b',
-                   "Binance-Peg ATOM": '0x0eb3a705fc54725037cc9e008bdede697f62f335', "Binance-Peg EOS": '0x56b6fb708fc5732dec1afc8d8556423a2edccbd6', "CAKE": '0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82', "Binance-Peg AXS": '0x715d400f88c167884bbcc41c5fea407ed4d2f8a0',
-                   "Binance-Peg BTC": '0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c', "Binance-Peg FTM": '0xad29abb318791d579433d831ed122afeaf29dcfe', "Binance-Peg BTT": '0x8595f9da7b868b1822194faed312235e43007b49', "Binance-Peg UST": '0x23396cf899ca06c4472205fc903bdb4de249d6fc',
-                   "Binance-Peg SHIB": '0x2859e4544c4bb03966803b044a93563bd2d0dd4d', "Binance-Peg COMP": '0x52ce071bd9b1c4b00a0b92d298c512478cad67e8', "Binance-Peg TUSD": '0x14016e85a25aeb13065688cafb43044c2ef86784', "Binance-Peg ZIL": '0xb86abcb37c3a4b64f74f59301aff131a1becc787',
-                   "Binance-Peg BAT": '0x101d82428437127bf1608f699cd651e6abf9766e', "SAFEMOON": '0x8076c74c5e3f5852037f31ff0093eeb8c8add8d3', "C98": '0xaec945e04baf28b135fa7c640f624f8d90f1c3a6', "Binance-Peg 1INCH": '0x111111111117dc0aa78b770fa6a738034120c302',
-                   "Binance-Peg SXP": '0x47bead2563dcbf3bf2c9407fea4dc236faba485a', "TWT": '0x4b0f1812e5df2a09796481ff14017e6005508003', "Binance-Peg MKR": '0x5f0da599bb2cccfcf6fdfd7d81743b6020864350', "BAKE": '0xE02dF9e3e622DeBdD69fb838bB799E3F168902c5',
-                   "XVS": '0xcf6bb5389c92bdda8a3747ddb454cb7a64626c63', "Binance-Peg BAND": '0xad6caeb32cd2c308980a548bd0bc5aa4306c6c18', "Binance-Peg REEF": '0xf21768ccbc73ea5b6fd3c687208a7c2def2d966e', "TLM": '0x2222227e22102fe3322098e4cbfe18cfebd57c95',
-                   "Binance-Peg COTI": '0xadbaf88b39d37dc68775ed1541f1bf83a5a45feb', "ALICE": '0xac51066d7bec65dc4589368da368b212745d63e8', "DODO": '0x67ee3cb086f8a16f34bee3ca72fad36f7db929e2', "vBTC": '0x882c173bc7ff3b7786ca16dfed3dfffb9ee7847b',
-                   "ATA": '0xa2120b9e674d3fc3875f415a7df52e382f141225', "TKO": '0x9f589e3eabe42ebc94a44727b3f3531c0c877809', "ALPACA": '0x8f0528ce5ef7b51152a59745befdd91d97091d2f', "vETH": '0xf508fcd89b8bd15579dc79a6827cb4686a3592c8',
-                   "EPS": '0xa7f552078dcc247c2684336020c03648500c6d9f', "POLS": '0x7e624fa0e1c4abfd309cc15719b7e2580887f570', "SFP": '0xd41fdb03ba84762dd66a0af1a6c8540ff1ba5dfb', "FEG": '0xacfc95585d80ab62f67a14c566c1b7a49fe91167',
-                   "CTK": '0xa8c2b8eec3d368c0253ad3dae65a5f2bbb89c929', "LIT": '0xb59490ab09a0f526cc7305822ac65f2ab12f9723', "Binance-Peg CREAM": '0xd4cb328a82bdf5f03eb737f37fa6b370aef3e888', "BZRX": '0x4b87642aedf10b642be4663db842ecc5a88bf5ba',
-                   "VAI": '0x4bd17003473389a42daf6a0a729f6fdb328bbbd7', "RFOX": '0x0a3a21356793b49154fd3bbe91cbc2a16c0457f5', "AUTO": '0xa184088a740c695e156f91f5cc086a06bb78b827', "FRONT": '0x928e55dab735aa8260af3cedada18b5f70c72f1b',
-                   "BURGER": '0xae9269f27437f0fcbc232d39ec814844a51d6b8f', "CHESS": '0x20de22029ab63cf9a7cf5feb2b737ca1ee4c82a6', "SPARTA": '0x3910db0600ea925f63c36ddb1351ab6e2c6eb102', "HTB": '0x4e840aadd28da189b9906674b4afcb77c128d9ea',
-                   "SKILL": '0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab', "LMT": '0x9617857e191354dbea0b714d78bc59e57c411087', "SPORE": '0x33a3d962955a3862c8093d1273344719f03ca17c', "CTI": '0x3f670f65b9ce89b82e82121fd68c340ac22c08d6',
-                   "EGG": '0xf952fc3ca7325cc27d15885d37117676d25bfda6', "SHIELD": '0x60b3bc37593853c04410c4f07fe4d6748245bf77', "Binance-Peg BETH": '0x250632378e573c6be1ac2f97fcdf00515d0aa91b', "PASTA": '0xab9d0fae6eb062f2698c2d429a1be9185a5d4f6e',
-                   "BOG": '0xb09fe1613fe03e7361319d2a43edc17422f36b09', "RISE": '0xc7d43f2b51f44f09fbb8a691a0451e8ffcf36c0a', "CHI": '0x0000000000004946c0e9f43f4dee607b0ef1fa1c', "POCO": '0x394bba8f309f3462b31238b3fd04b83f71a98848',
-                   "MWAR": '0xf8a1919da520a6c3b92e6abc64bf83c8d4432b14', "GON": '0x610f34da19797405a276d26f95bd5c7d8cbbd644', "BIN": '0xe56842ed550ff2794f010738554db45e60730371', "AIR": '0xd8a2ae43fd061d24acd538e3866ffc2c05151b53',
-                   "NFTL": '0xe7f72bc0252ca7b16dbb72eeee1afcdb2429f2dd', "ULTI": '0x42bfe4a3e023f2c90aebffbd9b667599fa38514f', "DZOO": '0x5419291d81c68c103363e06046f40a9056ab2b7f', "PEARL": '0x118b60763002f3ba7603a3c17f946a0c7dab789f',
-                   "LORD": '0x2daf1a83aa348afbcbc73f63bb5ee3154d9f5776', "MPS": '0x9eb5b7902d2be0b5aaba2f096e043d3cd804e6df', "ADAPAD": '0xdb0170e2d0c1cc1b2e7a90313d9b9afa4f250289', "WAG": '0x7fa7df4996ac59f398476892cfb195ed38543520',
-                   "DOGEX": '0x1f6819d87bd6e10cae34883175232ee9774e00b2', "BPET": '0x24d787e9b88cb62d74e961c1c1d78e4ee47618e5', "HONEYPAD": '0xdb607c61aaa2a954bf1f9d117953f12d6c319e15', "ECC": '0x8d047f4f57a190c96c8b9704b39a1379e999d82b',
-                   "HoneyPadDividendTracker": '0x2c65debf3c7671cb79340bddb0893fbb0d5accd7', "MEDA": '0x9130990dd16ed8be8be63e46cad305c2c339dac9', "MONS": '0xe4c797d43631f4d660ec67b5cb0b78ef5c902532', "IDTT": '0x6fb1e018f107d3352506c23777e4cd62e063584a',
-                   "GLMS": '0x75f53011f6d51c60e6dcbf54a8b1bcb54f07f0c9', "XPNET": '0x8cf8238abf7b933bf8bb5ea2c7e4be101c11de2a', "ZOO": '0x19263f2b4693da0991c4df046e4baa5386f5735e', "BIT": '0xc864019047b864b6ab609a968ae2725dfaee808a',
-                   "ETERNAL": '0xd44fd09d74cd13838f137b590497595d6b3feea4', "MONS": '0xe4c797d43631f4d660ec67b5cb0b78ef5c902532', "APAD": '0x366d71ab095735b7dae83ce2b82d5262ef655f10', "GEMG": '0x885c5fb8f0e67b2b0cf3a437e6cc6ebc0f9f9014',
-                   "VERO": '0x0ef008ff963572d3dabc12e222420f537ddabf94', "GRBE": '0x8473927b49e6dd0548f8287ea94109b7b753e3cf', "HER": '0x6b9f6f911384886b2e622e406327085238f8a3c5', "FNDZ": '0x7754c0584372d29510c019136220f91e25a8f706',
-                   "THG": '0x9fd87aefe02441b123c3c32466cd9db4c578618f', "ForeverFOMO": '0x95637d4fbe7153dcc3e26e71bde7a2d82621f083', "GRX": '0x8fba8c1f92210f24fb277b588541ac1952e1aac8', "DSBOWL": '0x6a43f8f4b12fcd3b3eb86b319f92eb17c955dda3',
-                   "DOX": '0x30ea7c369b87fe261de28a1eefafe806696a738b', "GZONE":'0xb6adb74efb5801160ff749b1985fd3bd5000e938', "BabyFloki": '0x71e80e96af604afc23ca2aed4c1c7466db6dd0c4', "GHC":'0x683fae4411249ca05243dfb919c20920f3f5bfe0',
-                   "KING": '0x0ccd575bf9378c06f6dca82f8122f570769f00c2', "BEPR": '0xbf0cf158e84ebacca1b7746e794d507073e5adfe', "KITE": '0xede26a1ee14281b58a5238a3ff246b02358a13b6', "PKN": '0x4b5decb9327b4d511a58137a1ade61434aacdd43',
-                   "MiniFloki_Dividend_Tracker": '0xa9707c110aa656245472a01c229b74887439d15b', "BCOIN": '0x00e1656e45f18ec6747f5a8496fd39b50b38396d', "EGC": '0xc001bbe2b87079294c63ece98bdd0a88d761434e', "EPICHERO": '0x47cc5334f65611ea6be9e933c49485c88c17f5f0',
-                   "CODI": '0x4ac32178097c1f62beadcc2d215b54d6915013ee', "SPHYNX": '0x2e121ed64eeeb58788ddb204627ccb7c7c59884c', "FLOKIN": '0x97ea5efdcb5961a99ba5c96123042507c0210ec1', "WOJ": '0x55f96c7005d7c684a65ee653b07b5fe1507c56ab',
-                   "MAT": '0xf3147987a00d35eecc10c731269003ca093740ca', "FOMOBABY": '0x82d6e409438e9c2eaed8ceec4bd95918cbd17c87', "LIGHT": '0x037838b556d9c9d654148a284682c55bb5f56ef4', "MUSK": '0x57c84b307735d19e514b4ada2826f540910ffa48',
-                   "BNBCH": '0x840bcd536d647c3433bf830dbcb8debfa5b71c79', "HPAD": '0x7009bd9a1369e74457cdac84191ca83f33e89217', "HE": '0x20d39a5130f799b95b55a930e5b7ebc589ea9ed8', "RENA": '0xa9d75cc3405f0450955050c520843f99aff8749d',
-                   "BabyFlokiCoin": '0x808fac147a9c02723d0be300ac4753eaf93c0e1f', "ASTRO": '0x72eb7ca07399ec402c5b7aa6a65752b6a1dc0c27', "POKERFI": '0xfe073c3b891325ae8686d9cf2c8b3586674f7be2', "BETA": '0xbe1a001fe942f96eea22ba08783140b9dcc09d28',
-                   "ZOO2": '0x7ffc1243232da3ac001994208e2002816b57c669', "GRM": '0x7472e4f397e46eb371fe4c8e078cfda46d72415f', "Khalifa": '0xdae7238a7e83b439673a7900fa3bae2108c6ec12', "$Shibx": '0xaa357b0f167923efc1d6978a868f81866ca6e98c',
-                   "IUP": '0xc6f26e6df5f44c0ccd939581987c09b866cdbd1a', "BSCPAD": '0x5a3010d4d8d3b5fb49f8b6e57fb9e48063f16700'}
+    #Here we CALL our black list of tokens which are not interesting to us
+    a_file = open("lista_negra.json", "r") #looks for the file in the current path of this script and enables it for reading
+    lista_negra = a_file.read() #converts the content of the file into a string
+    lista_negra = json.loads(lista_negra) #converts the content of the file into a dictionary
+    a_file.close() #close this variable because bEsT PrAcTiCEs
     #here we set our beautiful counter to 0
     i=0
     #here we set the greatest final dataframe which will only contain good options to invest in
@@ -220,11 +194,12 @@ while y < limite:
         print('\n')
         url = 'https://bscscan.com/tx/{}'.format(check)
         driver.get(url)
+        time.sleep(3)
         #Here we check first if the Tx Id provided was a Success or a Failure, If Success, we continue with the process, else we delete the current row from the df and start again with the following one.
         #However, firstly we are going to set a new while loop to make sure that the status element is going to be located and readable when needed
         #But first, we set our counter (z) to 0
         z = 0
-        while z < 100:
+        while z < 10:
             try:
                 WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH,'//*[@id="ContentPlaceHolder1_maintable"]/div[2]/div[2]/span')))
                 status = str(driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_maintable"]/div[2]/div[2]/span').text) 
@@ -235,7 +210,7 @@ while y < limite:
                 print(f'Intento: {z} - Joder, el estado de esta transacción aún no es visible (-_-"), lo intentaré de nuevo...')
                 time.sleep(2.3)
                 driver.refresh()
-                time.sleep(4)
+                time.sleep(5.2)
                 z += 1
         if status != 'Success':
             print('Qué mal, esta transacción falló')
@@ -301,7 +276,7 @@ while y < limite:
                         #Again, firstly we are going to set a new while loop to make sure that the No. of Hodlers element is going to be located and readable when needed
                         #But first, we set our counter (z) to 0
                         z = 0
-                        while z < 100:
+                        while z < 10:
                             try:
                                 WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[1]/main/div[4]/div[1]/div[1]/div/div[2]/div[3]/div/div[2]/div/div')))                        
                                 Hodlers = int(driver.find_element_by_xpath('/html/body/div[1]/main/div[4]/div[1]/div[1]/div/div[2]/div[3]/div/div[2]/div/div').text.replace(',','').replace(' ','').replace('addresses',''))
@@ -312,7 +287,7 @@ while y < limite:
                                 print(f'Intento: {z} - Joder, el número de hodlers de esta dirección aún no es visible (-_-"), lo intentaré de nuevo...')
                                 time.sleep(3.5)
                                 driver.refresh()
-                                time.sleep(4.5)
+                                time.sleep(4.7)
                                 z += 1
                         if Hodlers >= 5600 and Hodlers < 20000:
                             print('\n')
@@ -335,7 +310,7 @@ while y < limite:
                                 #Right below, we are going to set a new while loop to make sure that the contract_age element is going to be located and readable when needed
                                 #But first, we set our counter (x) to 0
                                 x = 0
-                                while x < 100:
+                                while x < 10:
                                     try:
                                         WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div[3]/div/div[2]/div/div[2]/div/div[1]/div/div[1]/table/tbody/tr[9]/td[2]/span')))
                                         contract_age = driver.find_element_by_xpath('/html/body/div[2]/div[3]/div/div[2]/div/div[2]/div/div[1]/div/div[1]/table/tbody/tr[9]/td[2]/span').text
@@ -361,6 +336,10 @@ while y < limite:
                                     initial_df.loc[initial_df.index[i], 'Transfers'] = [Transfers]
                                     initial_df.loc[initial_df.index[i], 'Age'] = [str(contract_age)+" days"]
                                     initial_df.loc[initial_df.index[i], 'Date Taken'] = [hora_actual]
+                                    lista_negra[Name] = Addresser #updates the dictionary (variable) by adding the Ticket (Key) and Contract Address (Value) of the new cryptocurrency found 
+                                    jsonFile = open("lista_negra.json", "w+") #looks for the file in the current path of this script and enables it for update
+                                    json.dump(lista_negra, jsonFile) #copies and pastes the dictionary from the lista_negra variable into the json file
+                                    jsonFile.close() #close this variable because bEsT PrAcTiCEs 
                                     i +=1
                                     break
                                 else:
@@ -415,7 +394,7 @@ while y < limite:
     #Here we re-instantiate the driver again to avoid a MaxRetryError
     driver = webdriver.Chrome(executable_path='C:/Users/ResetStoreX/AppData/Local/Programs/Python/Python39/Scripts/chromedriver.exe', options=options)
     #Now we set our delay time (seconds) randomly from 22 seconds to 87 seconds
-    seconds = random.randint(22, 87)
+    seconds = random.randint(2, 5)
     if y < limite:
         time.sleep(5)
         print('\033[46mAhora vamos a esperar un tiempo antes de repetir el proceso anterior :)')
