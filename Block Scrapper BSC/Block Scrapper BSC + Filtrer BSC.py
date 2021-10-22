@@ -177,16 +177,11 @@ while y < limite:
     print(f'Esta DataFrame tiene {total_rows} filas en total')
     print('\n')
     
-    #Here we CALL our black list of tokens which are not interesting to us
-    a_file = open("lista_negra.json", "r") #looks for the file in the current path of this script and enables it for reading
-    lista_negra = a_file.read() #converts the content of the file into a string
-    lista_negra = json.loads(lista_negra) #converts the content of the file into a dictionary
-    a_file.close() #close this variable because bEsT PrAcTiCEs
     #here we set our beautiful counter to 0
     i=0
     #here we set the greatest final dataframe which will only contain good options to invest in
     dataframe_definitiva = pd.DataFrame()
-    #let's do the fucking while loop bro
+    #let's do the fucking while loop bro    
     while i < (len(initial_df)):
         print(f'Analizando la fila #{i}')
         check = initial_df['Transaction Id'].iloc[i]
@@ -230,7 +225,8 @@ while y < limite:
             #extract the Name Tag and the Link from the contract address of every single token the list above has
             for token in token_list:    
                 #we use a dictionary trick here because this was the only way this shit worked properly lol
-                datos = {'Name': token.text, 'Address': token.get_attribute("href").replace('https://bscscan.com/token/','')}
+                #the following regular expression " .rsplit('(', 1)[-1].rstrip(')') " is used to get only the ticket 'Name' that's inside the parenthesis ()
+                datos = {'Name': token.text.rsplit('(', 1)[-1].rstrip(')'), 'Address': token.get_attribute("href").replace('https://bscscan.com/token/','')}
                 print(datos)
                 #then we append the data above to the df_token, while ignoring the index, fuck the index
                 df_token = df_token.append(datos, ignore_index = True)                  
@@ -258,6 +254,11 @@ while y < limite:
                     print('\n')
                     print('A continuación se procede a verificar sí la anterior dirección de contrato inteligente está en "la lista negra" de contratos no deseados...')
                     #Now that we found our desired token, we check first if it exists in our lista_negra
+                    #Here we CALL our black list of tokens which are not interesting to us
+                    a_file = open("lista_negra.json", "r") #looks for the file in the current path of this script and enables it for reading
+                    lista_negra = a_file.read() #converts the content of the file into a string
+                    lista_negra = json.loads(lista_negra) #converts the content of the file into a dictionary
+                    a_file.close() #close this variable because bEsT PrAcTiCEs
                     if Addresser in lista_negra.values():
                         print('\n')
                         print(f'Qué pena, este contrato "{Addresser}" está en la lista negra, por ende no nos interesa y se procede a borrar su Tx Id de la df')
@@ -407,4 +408,3 @@ while y < limite:
             time.sleep(1)
     else: 
         print('Ciclo terminado :3')
-    
