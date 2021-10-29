@@ -280,6 +280,8 @@ while y < limite:
                         while z < 10:
                             try:
                                 WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[1]/main/div[4]/div[1]/div[1]/div/div[2]/div[3]/div/div[2]/div/div')))                        
+                                #Here we update the Name Tag variable, since in its previous declaration sometimes the ticket name is not saved completely (it ends up with "...").
+                                Name = driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_divSummary"]/div[1]/div[1]/div/div[2]/div[2]/div[2]/b').text                                
                                 Hodlers = int(driver.find_element_by_xpath('/html/body/div[1]/main/div[4]/div[1]/div[1]/div/div[2]/div[3]/div/div[2]/div/div').text.replace(',','').replace(' ','').replace('addresses',''))
                                 print(f'Este contrato tiene posee esta cantidad de hodlers: {Hodlers}')
                                 break
