@@ -36,13 +36,15 @@ options = webdriver.ChromeOptions()
 options.add_argument('--headless')
 #remove warning in console
 options.add_argument("--log-level=3")
+#open driver with 1920x1080 resolution
+options.add_argument("--window-size=1920,1080")
 #set the location of driver executable path and enable options for the driver
 driver = webdriver.Chrome(executable_path='C:/Users/ResetStoreX/AppData/Local/Programs/Python/Python39/Scripts/chromedriver.exe', options=options)
 #Here we start to automate the big process down below
 #First we set our counter (y) to 1
 y = 1
-#Now we set the amount of reruns (limite) to 6, this means this loop will run 5 times, because it starts in 1, not in 0
-limite = 6
+#Now we set the amount of reruns (limite) to 5, this means this loop will run 4 times, because it starts in 1, not in 0
+limite = 5
 #Here's where the party begins
 while y < limite:
     print(f'\u001b[45m Intento No. {y} de {limite-1} \033[0m')
@@ -90,12 +92,10 @@ while y < limite:
             
             df = pd.DataFrame()
             df2 = pd.DataFrame()
-            
-            
+                        
             print(df)
             print(df2)
-            
-            
+                        
             #set a sub loop for each row from the table of each page of each block
             for page in range(1,pages+1):
             
@@ -172,16 +172,19 @@ while y < limite:
     initial_df.insert(5,'Hodlers', None)
     initial_df.insert(6,'Transfers', None)
     initial_df.insert(7,'Age', None)
-    initial_df.insert(8,'Date Taken', None)
+    initial_df.insert(8,'Marketcap', None)
+    initial_df.insert(9,'Total Liquidity', None)
+    initial_df.insert(10,'Price', None)
+    initial_df.insert(11,'Date Taken', None)
     print('\n')
     print(f'Esta DataFrame tiene {total_rows} filas en total')
     print('\n')
-    
+        
     #here we set our beautiful counter to 0
     i=0
     #here we set the greatest final dataframe which will only contain good options to invest in
     dataframe_definitiva = pd.DataFrame()
-    #let's do the fucking while loop bro    
+    #let's do the fucking while loop bro
     while i < (len(initial_df)):
         print(f'Analizando la fila #{i}')
         check = initial_df['Transaction Id'].iloc[i]
@@ -279,11 +282,11 @@ while y < limite:
                         z = 0
                         while z < 10:
                             try:
-                                WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[1]/main/div[4]/div[1]/div[1]/div/div[2]/div[3]/div/div[2]/div/div')))                        
+                                WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[1]/main/div[4]/div[1]/div[1]/div/div[2]/div[3]/div/div[2]/div/div')))        
                                 #Here we update the Name Tag variable, since in its previous declaration sometimes the ticket name is not saved completely (it ends up with "...").
-                                Name = driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_divSummary"]/div[1]/div[1]/div/div[2]/div[2]/div[2]/b').text                                
+                                Name = driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_divSummary"]/div[1]/div[1]/div/div[2]/div[2]/div[2]/b').text 
                                 Hodlers = int(driver.find_element_by_xpath('/html/body/div[1]/main/div[4]/div[1]/div[1]/div/div[2]/div[3]/div/div[2]/div/div').text.replace(',','').replace(' ','').replace('addresses',''))
-                                print(f'Este contrato tiene posee esta cantidad de hodlers: {Hodlers}')
+                                print(f'Este contrato posee esta cantidad de hodlers: {Hodlers}')
                                 break
                             except:
                                 #Else, this bitch is going to sleep tight for 3 seconds for then repeating the loop until problem is no more!
@@ -292,7 +295,7 @@ while y < limite:
                                 driver.refresh()
                                 time.sleep(4.7)
                                 z += 1
-                        if Hodlers >= 5600 and Hodlers < 20000:
+                        if Hodlers >= 5200 and Hodlers < 20000:
                             print('\n')
                             print('Dado que esta criptomoneda pasa este filtro de los HODLERS, procederemos a aplicar otro filtro')
                             Transfers = driver.find_element_by_xpath('/html/body/div[1]/main/div[4]/div[1]/div[1]/div/div[2]/div[4]/div/div[2]/span').text.replace(',','')
@@ -303,7 +306,7 @@ while y < limite:
                                     break
                             print(f'Se han realizado hasta el momento un total de {Transfers} transferencias dentro de este contrato inteligente')
                             #Assuming the amount of hodlers is greater than 3000 and less than 20000, we now check its number of transfers
-                            if int(Transfers) >= 3*Hodlers:
+                            if int(Transfers) >= 2.5*Hodlers:
                                 print('Estupendo, esta criptomoneda cumple con el filtro de las transferencias, procederemos a aplicar un último filtro')
                                 url_3 = 'https://explorer.bitquery.io/bsc/token/{}'.format(Addresser)
                                 driver.get(url_3)
@@ -328,16 +331,49 @@ while y < limite:
                                         time.sleep(5)
                                         x += 1                                     
                                 #Assuming the number of transfers is at least 2 times the number of hodlers, we now check how old is our desired token (in days)
-                                if int(contract_age) < 26:
-                                    print('Excelente, esta criptomoneda ha pasado todos los filtros, se procede a añadir información de su NameTag, Contract Address, Hodlers, Transfers, y Age a la nueva DataFrame junto con la fecha y hora en la que se tomó esta información')
+                                if int(contract_age) < 25:
+                                    print('Excelente, esta criptomoneda ha pasado todos los filtros, se procede a añadir información de su NameTag, Contract Address, Hodlers, Transfers, Age, Marketcap, Liquidez, y Precio a la nueva DataFrame junto con la fecha y hora en la que se tomó esta información')
+                                    print('\n')
                                     print(initial_df)
-                                    #Now that our desired token has met all of our requirements, we are going to append its data to our dataframe_definitiva, including the current date and time at the moment this part is being executed
+                                    #Let's get now the CURRENT Marketcap, Price, and Total Liquidity of the contract
+                                    url_4 = 'https://swap.arken.finance/tokens/bsc/{}'.format(Addresser)
+                                    driver.get(url_4)
+                                    #let's wait for the price element to be loaded correctly
+                                    w = 0
+                                    while w < 10:
+                                        try:
+                                            #Here we use the visibility_of_element_located condition because we want to specifically extract informatrion from the attribute of this element
+                                            WebDriverWait(driver, 12).until(EC.visibility_of_element_located((By.XPATH, '//*[@id="root"]/div/div/div/div/div/div[1]/div[1]/div[2]/div[1]/div[2]/div/div[1]/b')))
+                                            Price = driver.find_element_by_xpath('//*[@id="root"]/div/div/div/div/div/div[1]/div[1]/div[2]/div[1]/div[2]/div/div[1]/b').text
+                                            #If contract_age element is located and read, Bingo, problem is no more!
+                                            print(f'El precio actual de esta criptomoneda es el siguiente: {Price}')
+                                            break
+                                        except:
+                                            #Else, this bitch is going to sleep tight for 3 seconds for then repeating the loop until problem is no more!
+                                            print(f'Intento: {w} - Joder, no encontré este elemento en el tiempo deseado (-_-), lo intentaré de nuevo...')                                        
+                                            driver.refresh()
+                                            time.sleep(3)
+                                            w += 1 
+                                    print('\n')
+                                    print(url_4)
+                                    #get the current Marketcap
+                                    Marketcap = driver.find_element_by_xpath('//*[@id="root"]/div/div/div/div/div/div[1]/div[1]/div[2]/div[3]/div[3]/div[2]/div').text
+                                    #get current Price
+                                    #get the net liquidity value this contract has
+                                    total_liq = driver.find_elements_by_xpath('//*[@id="root"]/div/div/div/div/div/div[1]/div[1]/div[2]/div[3]/div[2]/div[2]/div')[0].text
+                                    print(f'El valor del Marketcap es: {Marketcap}')
+                                    print(f'El precio de esta criptomoneda actualmente es: {Price}')  
+                                    print(f'la liquidez total de esta criptomoneda es {total_liq}')
+                                    #Now that our desired token has met all of our requirements, we are going to append its data to our dataframe_definitiva, including the current date and time at the moment this part is being executed                                  
                                     hora_actual = time.ctime()
                                     initial_df.loc[initial_df.index[i], 'Name Tag'] = [Name]
                                     initial_df.loc[initial_df.index[i], 'Contract Address'] = [Addresser]
                                     initial_df.loc[initial_df.index[i], 'Hodlers'] = [Hodlers]
                                     initial_df.loc[initial_df.index[i], 'Transfers'] = [Transfers]
                                     initial_df.loc[initial_df.index[i], 'Age'] = [str(contract_age)+" days"]
+                                    initial_df.loc[initial_df.index[i], 'Marketcap'] = [Marketcap]
+                                    initial_df.loc[initial_df.index[i], 'Total Liquidity'] = [total_liq]
+                                    initial_df.loc[initial_df.index[i], 'Price'] = [Price]
                                     initial_df.loc[initial_df.index[i], 'Date Taken'] = [hora_actual]
                                     lista_negra[Name] = Addresser #updates the dictionary (variable) by adding the Ticket (Key) and Contract Address (Value) of the new cryptocurrency found 
                                     jsonFile = open("lista_negra.json", "w+") #looks for the file in the current path of this script and enables it for update
@@ -359,7 +395,7 @@ while y < limite:
                                 i +=1
                                 break
                         else: 
-                            if Hodlers < 5600 or Hodlers > 20000:
+                            if Hodlers < 5200 or Hodlers > 20000:
                                 print('Lamentablemente, esta criptomoneda no pasó este filtro de los HODLERS, procederemos a eliminarla de la lista de opciones, para luego seguir con la siguiente Tx Id')
                                 initial_df = initial_df.drop(initial_df.index[i])
                                 print(initial_df)
@@ -410,3 +446,4 @@ while y < limite:
             time.sleep(1)
     else: 
         print('Ciclo terminado :3')
+    
