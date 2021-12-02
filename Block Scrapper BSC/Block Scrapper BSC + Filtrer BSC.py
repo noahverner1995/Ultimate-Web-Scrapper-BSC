@@ -340,10 +340,11 @@ while y < limite:
                                     driver.get(url_4)
                                     #let's wait for the price element to be loaded correctly
                                     w = 0
+                                    killer = 0
                                     while w < 10:
                                         try:
                                             #Here we use the visibility_of_element_located condition because we want to specifically extract informatrion from the attribute of this element
-                                            WebDriverWait(driver, 12).until(EC.visibility_of_element_located((By.XPATH, '//*[@id="root"]/div/div/div/div/div/div[1]/div[1]/div[2]/div[1]/div[2]/div/div[1]/b')))
+                                            WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, '//*[@id="root"]/div/div/div/div/div/div[1]/div[1]/div[2]/div[1]/div[2]/div/div[1]/b')))
                                             Price = driver.find_element_by_xpath('//*[@id="root"]/div/div/div/div/div/div[1]/div[1]/div[2]/div[1]/div[2]/div/div[1]/b').text
                                             #If contract_age element is located and read, Bingo, problem is no more!
                                             print(f'El precio actual de esta criptomoneda es el siguiente: {Price}')
@@ -352,10 +353,27 @@ while y < limite:
                                             #Else, this bitch is going to sleep tight for 3 seconds for then repeating the loop until problem is no more!
                                             print(f'Intento: {w} - Joder, no encontré este elemento en el tiempo deseado (-_-), lo intentaré de nuevo...')                                        
                                             driver.refresh()
-                                            time.sleep(3)
-                                            w += 1 
+                                            time.sleep(0.7)
+                                            w += 1
+                                            if w >3:
+                                                #last try
+                                                try:
+                                                    Price = driver.find_element_by_xpath('//*[@id="root"]/div/div/div/div/div/div[1]/div[1]/div[2]/div[1]/div[2]/div/div[1]/b').text
+                                                except NoSuchElementException:
+                                                    print(f'Al parecer este contrato: {Addresser} es un tonto token tracker de dividendos')
+                                                    #we will use the killer variable to break the while total_rows > 0 loop
+                                                    killer = 1
+                                                    break
                                     print('\n')
                                     print(url_4)
+                                    #check if it's a stupid dividend token tracker
+                                    if killer == 1:
+                                        print(f'Como este contrato: {Addresser} es un inútil token tracker de dividendos, vamos a descartarlo y a seguir con el siguiente.')
+                                        initial_df = initial_df.drop(initial_df.index[i])
+                                        print(initial_df)
+                                        i +=1
+                                        killer = 0
+                                        break
                                     #get the current Marketcap
                                     Marketcap = driver.find_element_by_xpath('//*[@id="root"]/div/div/div/div/div/div[1]/div[1]/div[2]/div[3]/div[3]/div[2]/div').text
                                     #get current Price
