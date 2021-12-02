@@ -24,6 +24,7 @@ import numpy as np
 #import date library to know how much takes this program takes for analyzing an specific interval of blocks
 from datetime import datetime
 import time
+from selenium.common.exceptions import NoSuchElementException
 #import selenium functions to make sure the program will wait enough time before getting some data from pages
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
